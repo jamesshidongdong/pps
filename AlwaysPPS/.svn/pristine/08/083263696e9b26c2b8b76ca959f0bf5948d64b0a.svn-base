@@ -1,0 +1,276 @@
+﻿
+@{
+    ViewBag.Title = "项目详情";
+    var ptSource = ViewBag.ProType as List<SelectListItem>;
+}
+
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>项目详情</h3>
+        </div>
+        <div class="subTitleBar" style="display: none">
+            <div class="row">
+                <div class="col-md-3">
+                    <b class="title">项目编号：</b>
+                    <span class="details">2014020501</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建日期：</b>
+                    <span class="details">20140205</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建人：</b>
+                    <span class="details">Hankiong</span>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div id="addNewItem" class="addNewItemBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>项目名称</label>
+                                <input type="text" class="form-control"
+                                       data-auto-bind="false"
+                                       data-bind="value: projectName" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                <label >客&nbsp;&nbsp;&nbsp;&nbsp;户</label>
+                                <input type="text" class="form-control" id="clientName"
+                                       data-role="autocomplete"
+                                       data-auto-bind="false"
+                                       data-bind="source: clients,
+    value: client" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                <label>项目类别</label>
+
+                                 <select id="projectTypeID"
+                                         
+                                         data-role="dropdownlist"
+                                         data-auto-bind="false"
+                                         data-value-primitive="true"
+                                         data-option-label="请选择类别"
+                                         data-text-field="Text"
+                                         data-value-field="Value"
+                                         data-bind="value: projectType,
+    source: projectTypes" >
+                                    </select>
+
+                            </div>
+                            <div class="col-md-2">
+                                <label >部&nbsp;&nbsp;&nbsp;&nbsp;门</label>
+
+
+                                <select  
+                                         data-cascade-from="projectTypeID"
+                                         data-role="dropdownlist"
+                                         data-auto-bind="false"
+                                         data-value-primitive="true"
+                                         data-option-label="请选择部门"
+                                         data-text-field="Text"
+                                         data-value-field="Value"
+                                         data-bind="value: department,
+    source: depts" >
+                               </select>
+                            </div>
+                           
+                            <div class="col-md-2">
+                                <label>期&nbsp;&nbsp;&nbsp;&nbsp;限</label>
+                                <input class="form-control" 
+                                       data-role="datepicker"
+                                       data-bind="value: deadline"
+                                    />                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>项目介绍</label>
+                        <textarea class="form-control" rows="3" data-auto-bind="false" data-bind="value: projectIntroduction"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label>项目执行团队</label>
+                                <input type="text" class="form-control"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="value: ProjectTeam,
+    source: ProjectTeams" 
+                                    />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="buttonTeam">
+                        <button class="btn btn-blueBlack" data-bind="click: Submit"><i class="icon-ok-sign"></i>&nbsp;&nbsp;提交</button>
+                        <button class="btn btn-blueBlack"><i class="icon-thumbs-up"></i>&nbsp;&nbsp;批准</button>
+                        <button class="btn btn-blueBlack"><i class="icon-thumbs-down"></i>&nbsp;&nbsp;拒绝</button>
+                        <button class="btn btn-blueBlack"><i class="icon-list-alt"></i>&nbsp;&nbsp;修改项目详情</button>
+                    </div>
+                </form>
+            </div>
+            <div class="panelbarWrapper">
+                <ul id="panelbar">
+                    <li>
+                        里程碑
+                        <div></div>
+                    </li>
+                    <li>
+                        工作安排
+                        <div></div>
+                    </li>
+                    <li>
+                        文件
+                        <div></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        kendo.culture("zh-CN");
+        var clientsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            type: "aspnetmvc-ajax",
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetClient",
+                    data: function () {
+                        var keyword = $("#clientName").data("kendoAutoComplete").value() || "";
+                        return { client: keyword };
+                    }
+                }
+            }
+        });
+
+
+
+
+        var departmentDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetDepart",
+                    data: function() {
+                        return {projectTypeID:$("#projectTypeID").val()}
+                    },
+                }
+            }
+        });
+
+        var ProjectTeamDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "jsonp",
+                    url: "http://demos.telerik.com/kendo-ui/service/Products",
+
+                }
+            }
+        });
+        var addNewItemModel = kendo.observable({
+            clients: clientsDataSource,
+            departments: departmentDataSource,
+            ProjectTeams: ProjectTeamDataSource,
+
+           
+            projectTypes: @Html.Raw(Json.Encode(ptSource)),
+            depts: departmentDataSource,
+
+            projectName: null,
+            department:null,
+            client: null,
+          
+            projectType: null,
+            deadline: null,
+            projectIntroduction: null,
+            ProjectTeam: null,
+            isPrimitive: false,
+            
+           
+
+            Submit: function (e) {
+                var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+                if (!editTraining.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var SubmitModel = {
+                    projectName: this.projectName,
+                    client: this.client,
+                    department: this.get("department"),
+                    projectType: this.get("projectType"),
+                    deadline: this.deadline,
+                    projectIntroduction: this.projectIntroduction,
+                    ProjectTeam: this.ProjectTeam,
+                };
+
+
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/Add",
+                    data: kendo.stringify(SubmitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (script) {
+                        eval(script);
+                    }
+                });
+           
+            },
+
+            Alter:function (e) {
+                var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+                if (!editTraining.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var AlterModel = {
+                    projectName: this.projectName,
+                    client: this.client,
+                    department: this.get("department"),
+                    projectType: this.get("projectType"),
+                    deadline: this.deadline,
+                    projectIntroduction: this.projectIntroduction,
+                    ProjectTeam: this.ProjectTeam,
+                };
+
+
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/Add",
+                    data: kendo.stringify(AlterModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (script) {
+                        eval(script);
+                    }
+                });
+           
+            },
+        });
+        kendo.bind($("#addNewItem"), addNewItemModel);
+
+        //面板条
+        $("#panelbar").kendoPanelBar({
+            expandMode: "single",
+            contentUrls: [
+                '/Project/Milestone/'+'@ViewBag.project.ProjectId',
+                '/Project/HumanResourcePlanning?projectId='+'@ViewBag.project.ProjectId',
+                '/Project/Folder?projectId='+'@ViewBag.project.ProjectId',
+            ]
+        });
+    })
+</script>
+

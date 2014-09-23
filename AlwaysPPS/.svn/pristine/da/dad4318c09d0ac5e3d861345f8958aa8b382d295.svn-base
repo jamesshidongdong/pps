@@ -1,0 +1,532 @@
+﻿@{
+    ViewBag.Title = "报表（人力资源概括）";
+}
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>报表（工时汇总）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label> 开始时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate" 
+                                       id="beginTime"
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 结束时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate" 
+                                       id="endTime" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 立项部门</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择立项部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: foundedDepartment,value: selectFoundedDepartment"                  
+                                       data-filter="startswith"
+                                       id="buildDepart"  
+                                    />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>客户</label><br/>
+                                <input type="text" class="form-control"  style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择客户"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-filter="startswith"
+                                       data-bind="source: customers,value: customer" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label>项目</label><br/>
+                                <input type="text" class="form-control"  style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择项目"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source:projects,value:project" 
+                                       data-filter="startswith"
+                                    />
+                            </div>
+                            <div class="col-md-4 ">
+                                
+                                <button class="btn btn-blueBlack hyponasty" id="searchs" data-bind="click: Submit" type="button" ><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                                <button class="btn btn-blueBlack hyponasty"  id="excels"  data-bind="click: Export" type="button" ><i class="icon-list-alt"></i>&nbsp;&nbsp;导出</button>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+           
+            <div id="tabHumanResource">
+                <ul>
+                    <li class="k-state-active">
+                        列表
+                    </li>
+                    <li>
+                        图表
+                    </li>
+                        
+                </ul>
+                <div>
+                    <div id="searchGrid" class="hrSummaryTableWapper fakeContainer"></div>
+                </div>
+                <div>
+                    <div class="chart">
+                        <div class="chartTitle">按客户查看工时</div>
+                        <p id="clientData" style="display: none;font-size: 20px;color: black">无数据...</p>
+                        <div id="clienteleCheck" class="chartMain" ></div>
+                    </div>
+                    <div class="chart">
+                        <div class="chartTitle">按部门查看工时</div>
+                        <p id="departData" style="display: none;font-size: 20px;color: black">无数据...</p>
+                        <div id="departmentCheck" class="chartMain" ></div>
+                    </div>
+                    <div class="chart">
+                        <div class="chartTitle">按项目查看工时</div>
+                        <p id="projectData" style="display: none;font-size: 20px;color: black">无数据...</p>
+                        <div id="projectCheck" class="chartMain" ></div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+   
+</div>
+<script src="~/Scripts/jquery.fileDownload.js"></script>
+<script>
+
+    $(function() {
+        //tab
+
+        function onActivate(e) {
+            structure(60, 220, "menu", "slideArea");
+        }
+
+        
+        $("#tabHumanResource").kendoTabStrip({
+            activate: onActivate,
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            }
+        });
+
+
+        var foundedDepartmentDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/GetBuheadDepart"
+                }
+            }
+        });
+
+
+        var customersDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/GetCustomersBydept"
+                }
+            }
+        });
+
+        var projectsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/GetProjects"
+                }
+            }
+        });
+
+        var searchBarModel = kendo.observable({
+            foundedDepartment: foundedDepartmentDataSource,
+            customers: customersDataSource,
+            projects: projectsDataSource,
+            startDate: "",
+            endingDate: "",
+            selectFoundedDepartment: null,
+            customer: null,
+            project: null,
+            Submit: function(e) {
+
+                e.preventDefault();
+
+                var st = $("#endTime").val();
+                var et = $("#endTime").val();
+                if (st == "" || et == "") {
+                    app.Notification.error("开始或结束时间不能为空！");
+                    return false;
+                }
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                var submitModel = {
+                    StartData: this.get("startDate"),
+                    EndData: this.get("endingDate"),
+                    createDeptid: this.get("selectFoundedDepartment"),
+                    clientName: this.get("customer"),
+                    projectName: this.get("project")
+                };
+                var gridDataSource = new kendo.data.DataSource({
+                    serverFiltering: true,
+                    serverPaging: true,
+                    type: "aspnetmvc-ajax",
+                    transport: {
+                        read: {
+                            url: '@Url.Action("GetReportData", "ReportForm")',
+                            data: function(data) {
+                                return {
+                                    StartData: submitModel.StartData,
+                                    EndData: submitModel.EndData,
+                                    createDeptid: submitModel.createDeptid,
+                                    clientName: submitModel.clientName,
+                                    projectName: submitModel.projectName
+                                };
+                            }
+                        },
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    pageSize: 10,
+                    schema: {
+                        data: "Data",
+                        total: "Total"
+                    },
+                    pageable: { pageSize: 10, buttonCount: 10 },
+                });
+                var clientSource = new kendo.data.DataSource({
+                    serverFiltering: true,
+                    type: "aspnetmvc-ajax",
+                    transport: {
+                        read: {
+                            url: '@Url.Action("GetReportDataByClient", "ReportForm")',
+                            data: function (data) {
+                                return {
+                                    StartData: submitModel.StartData,
+                                    EndData: submitModel.EndData,
+                                    createDeptid: submitModel.createDeptid,
+                                    clientName: submitModel.clientName,
+                                    projectName: submitModel.projectName
+                                };
+                            }
+                        },
+                        dataType: "json",
+                        type: "POST",
+                    }
+                });
+                var deptSource = new kendo.data.DataSource({
+                    serverFiltering: true,
+                    type: "aspnetmvc-ajax",
+                    transport: {
+                        read: {
+                            url: '@Url.Action("GetReportDataByDept", "ReportForm")',
+                            data: function (data) {
+                                return {
+                                    StartData: submitModel.StartData,
+                                    EndData: submitModel.EndData,
+                                    createDeptid: submitModel.createDeptid,
+                                    clientName: submitModel.clientName,
+                                    projectName: submitModel.projectName
+                                };
+                            }
+                        },
+ 
+                        dataType: "json",
+                        type: "POST",
+                    }
+                });
+                var projectSource = new kendo.data.DataSource({
+                    serverFiltering: true,
+                    type: "aspnetmvc-ajax",
+                    transport: {
+                        read: {
+                            url: '@Url.Action("GetReportDataByProject", "ReportForm")',
+                            data: function (data) {
+                                return {
+                                    StartData: submitModel.StartData,
+                                    EndData: submitModel.EndData,
+                                    createDeptid: submitModel.createDeptid,
+                                    clientName: submitModel.clientName,
+                                    projectName: submitModel.projectName
+                                };
+                            }
+                        },
+                        dataType: "json",
+                        type: "POST",
+                    }
+                });
+                $('#searchGrid').data('kendoGrid').setDataSource(gridDataSource);
+                
+                $("#clienteleCheck").data("kendoChart").setDataSource(clientSource);
+                $("#departmentCheck").data("kendoChart").setDataSource(deptSource);
+                $("#projectCheck").data("kendoChart").setDataSource(projectSource);
+                setTimeout("structure(60, 220, 'menu', 'slideArea');", 100);
+            },
+            Export: function (e) {
+                e.preventDefault();
+                var st = $("#endTime").val();
+                var et = $("#endTime").val();
+                if (st == "" || et == "") {
+                    app.Notification.error("开始或结束时间不能为空！");
+                    return false;
+                }
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                var submitModel = {
+                    StartData: kendo.toString(kendo.parseDate(this.get("startDate")),'yyyy-MM-dd'),
+                    EndData:  kendo.toString(kendo.parseDate(this.get("endingDate")),'yyyy-MM-dd'),
+                    createDeptid: this.get("selectFoundedDepartment"),
+                    clientName: this.get("customer"),
+                    projectName: this.get("project")
+                };
+                
+                $.fileDownload('@Url.Action("ExportSummaryReport")', {
+                    httpMethod: "POST",
+                    data: submitModel,
+                    successCallback: function (url) {
+                        //$(".firms-loading").hide();
+                    },
+                    failCallback: function (responseHtml, url) {
+                        app.Notification.warning("There was a problem generating your report, please try again.");
+                        //$(".firms-loading").hide();
+                    }
+                });
+                //window.location = '/ReportForm/ExportSummaryReport?StartData=' + submitModel.StartData + '&EndData=' + submitModel.EndData + '&createDeptid=' + submitModel.createDeptid + '&clientName=' + submitModel.clientName + '&projectName=' + submitModel.projectName;
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+
+    });
+    function createChart() {
+        $("#clienteleCheck").kendoChart({
+            dataSource: {
+                transport:
+                    {
+                        read: {
+                            url: '@Url.Action("GetReportDataByClient")',
+                            dataType: "json",
+                            success: function(data) {
+                                return data.RDC;
+                            }
+                        } },
+            },
+            title: false,
+            legend: {
+                position: "bottom"
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#%"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Totalhours",
+                categoryField: "ClientName",
+                startAngle: 150,
+            }],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#%"
+            },
+            dataBound: function (e) {
+                var datalength=  e.sender.dataSource._data.length;
+                if (datalength == 0) {
+                    $("#clientData").show();
+                } else {
+                    $("#clientData").hide();
+                } 
+            }
+        });
+        $("#departmentCheck").kendoChart({
+            dataSource: {
+                transport:
+                    {
+                        read: {
+                            url: '@Url.Action("GetReportDataByDept")',
+
+                            dataType: "json",
+                        }
+                    },
+            },
+            title: false,
+            legend: {
+                position: "bottom"
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#%"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Totalhours",
+                categoryField: "DeptName",
+                startAngle: 150,
+                
+            }],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#%"
+            }, dataBound: function (e) {
+                var datalength = e.sender.dataSource._data.length;
+                if (datalength == 0) {
+                    $("#departData").show();
+                } else {
+                    $("#departData").hide();
+                }
+                
+            }
+        });
+        $("#projectCheck").kendoChart({
+            dataSource: {
+                transport:
+                    {
+                        read: {
+                            url: '@Url.Action("GetReportDataByProject")',
+
+                            dataType: "json",
+                        }
+                    },
+            },
+            title: false,
+            legend: {
+                position: "bottom"
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#%"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Totalhours",
+                categoryField: "ProjectName",
+                startAngle: 150,
+            }],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#%"
+            }, dataBound: function (e) {
+                var datalength = e.sender.dataSource._data.length;
+                if (datalength == 0) {
+                    $("#projectData").show();
+                } else {
+                    $("#projectData").hide();
+                }
+            }
+        });
+    }
+
+    $("#searchGrid").kendoGrid({
+        dataSource: {
+            serverFiltering: true,
+            serverPaging: true,
+            type: "aspnetmvc-ajax",
+            transport: {
+                read: {
+                    url: '@Url.Action("GetReportData", "ReportForm")',
+                    data: function (data) {
+                        return {
+                            PageIndex: data.page,
+                            NumRow: data.pageSize
+                        };
+                    }
+                },
+                dataType: "json",
+                type: "POST"
+            },
+            schema: {
+                data: "Data",
+                total: "Total"
+            },
+            pageSize: 10
+        },
+        height: 200,
+        sortable: false,
+        reorderable: false,
+        resizable: false,
+        pageable: { pageSize: 10, buttonCount: 10 },
+        editable: true,
+        columns: [
+            {
+                field: "ClientName",
+                title: "客户",
+            },
+            {
+                field: "DepartmentName",
+                title: "立项部门",
+            },
+            {
+                field: "ProjectName",
+                title: "项目名称",
+            },
+            {
+                field: "Totalhours",
+                title: "总工时",
+                width: '10%'
+            }
+        ]
+
+    });
+
+    $(function() {
+        createChart();
+        structure(60, 220, "menu", "slideArea");
+    });
+</script>

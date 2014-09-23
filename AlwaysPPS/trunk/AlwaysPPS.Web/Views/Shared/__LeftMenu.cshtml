@@ -1,0 +1,81 @@
+﻿<div class="welcom">
+    <p>Welcome </p>
+    <h5>@ViewBag.UserName</h5>
+</div>
+<ul class="sidebar-list navigation" id="ulMeun">
+    @*<li class="openable">
+        <a href="/Html/Index">
+            <span class="icons-home iconL"></span>
+            <span class="text">首页</span>
+        </a>
+    </li>
+    <li class="openable">
+        <a href="/Html/AddNewItem">
+            <span class="icons-addNewItem iconL"></span>
+            <span class="text">新增项目</span>
+        </a>
+    </li>
+    <li class="openable">
+        <a href="#">
+            <span class="icons-searchableItems iconL"></span>
+            <span class="text">搜索项目</span>
+        </a>
+    </li>
+    <li class="openable">
+        <a class="openable-toggle" data-toggle="dropdown" href="#">
+            <span class="icons-schedule iconL"></span>
+            <span class="text">时间表</span>
+            <span class="icons-up iconR"></span>
+        </a>
+        <ul class="subNav">
+            <li><a href=""><span class="icons-left"></span>依项目</a></li>
+            <li><a href=""><span class="icons-left"></span>依人员</a></li>
+        </ul>
+    </li>
+    <li class="openable">
+        <a class="openable-toggle" data-toggle="dropdown" href="#">
+            <span class="icons-diagram iconL"></span>
+            <span class="text">报表</span>
+            <span class="icons-up iconR"></span>
+        </a>
+        <ul class="subNav">
+            <li><a href=""><span class="icons-left"></span>人力资源概括</a></li>
+            <li><a href=""><span class="icons-left"></span>依团队</a></li>
+            <li><a href=""><span class="icons-left"></span>项目分配</a></li>
+        </ul>
+    </li>*@
+    
+</ul>
+
+<script>
+    $(function() {
+        //if (window.localStorage.getItem("Data") == null)
+            $.get("/Report/GetMenu", function(res) {
+                if (res.Statu == "1") {
+                    //window.localStorage.setItem("Data", res.Data);
+                    //$("#ulMeun").html(window.localStorage.getItem("Data"));
+                    $("#ulMeun").html(res.Data);
+                }
+            }, "json");
+        //else {
+        //    $("#ulMeun").html(window.localStorage.getItem("Data"));
+        //}
+    });
+    
+    function meuns(org) {
+        var par = $(org).parent('.openable');
+        var sub = par.find(".subNav");
+        if (sub.is(':visible')) {
+            par.removeClass('active');
+            sub.slideUp(100);
+            $(this).find(".iconR").addClass("icons-up").removeClass("icons-down");
+        } else {
+            par.addClass('active');
+            sub.slideDown(200);
+            $(this).find(".iconR").removeClass("icons-up").addClass("icons-down");
+            par.siblings().removeClass('active').find(".subNav").slideUp(100);
+            par.siblings().find(".iconR").addClass("icons-up").removeClass("icons-down");
+        }
+        return false;
+    }
+</script>

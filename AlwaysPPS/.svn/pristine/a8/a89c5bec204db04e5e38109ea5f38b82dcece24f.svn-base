@@ -1,0 +1,345 @@
+﻿/* Bug fixed & base setting
+--------------------------------------------*/
+/* Cross-Brower CSS3 style that support css3
+-----------------------------------------------*/
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:after {
+  display: table;
+  content: "";
+  clear: both;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+body {
+  background: #fff;
+  color: #111111;
+  font-family: Arial, "Microsoft YaHei", "SimSun", "SimHei";
+}
+a:hover {
+  text-decoration: none;
+}
+[class^="iconB-"],
+[class*=" iconB-"] {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  *margin-right: .3em;
+  line-height: 14px;
+  vertical-align: text-top;
+  background-image: url("../images/glyphicons-halflings.png");
+  background-position: 14px 14px;
+  background-repeat: no-repeat;
+}
+.iconB-search {
+  background-position: -48px 0;
+}
+.iconB-chevron-left {
+  background-position: -432px -72px;
+}
+.iconB-chevron-right {
+  background-position: -456px -72px;
+}
+.iconB-download-alt {
+  background-position: -96px -24px;
+}
+.iconB-eye-close {
+  background-position: -120px -120px;
+}
+.iconB-envelope {
+  background-position: -72px 0;
+}
+[class^="icon-"],
+[class*=" icon-"] {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  *margin-right: .3em;
+  line-height: 14px;
+  vertical-align: text-top;
+  background-image: url("../images/glyphicons-halflings-white.png");
+  background-position: 14px 14px;
+  background-repeat: no-repeat;
+}
+.icon-off {
+  background-position: -384px 0;
+}
+.icon-lock {
+  background-position: -287px -24px;
+}
+.icon-ok-sign {
+  background-position: -72px -96px;
+}
+.icon-list-alt {
+  background-position: -264px -24px;
+}
+.icon-thumbs-up {
+  background-position: -96px -144px;
+}
+.icon-thumbs-down {
+  background-position: -120px -144px;
+}
+.icon-search {
+  background-position: -48px 0;
+}
+[class^="icons-"],
+[class*=" icons-"] {
+  background-image: url(../images/icon.png);
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  display: inline-block;
+}
+.icons-list {
+  background-position: -37px 0px;
+  height: 25px;
+  width: 28px;
+}
+.icons-home {
+  background-position: 0 -44px;
+  height: 16px;
+  width: 20px;
+}
+.icons-addNewItem {
+  background-position: -20px -44px;
+  height: 16px;
+  width: 21px;
+}
+.icons-searchableItems {
+  background-position: -39px -44px;
+  height: 16px;
+  width: 21px;
+}
+.icons-schedule {
+  background-position: -60px -44px;
+  height: 16px;
+  width: 21px;
+}
+.icons-diagram {
+  background-position: -83px -44px;
+  height: 16px;
+  width: 21px;
+}
+.icons-left {
+  background-position: -107px -49px;
+  height: 10px;
+  width: 5px;
+  margin-right: 5px;
+}
+.icons-up {
+  background-position: -120px -46px;
+  height: 10px;
+  margin-left: 10px;
+  width: 10px;
+}
+.icons-down {
+  background-position: -112px -47px;
+  width: 10px;
+  height: 10px;
+}
+.icons-course {
+  background-position: -24px 0px;
+  height: 16px;
+  width: 25px;
+}
+.icons-testPaper {
+  background-position: -45px 0px;
+  height: 16px;
+  width: 25px;
+}
+.icons-pencil {
+  background-position: -31px -39px;
+  height: 16px;
+  width: 17px;
+}
+.icons-backlog {
+  background-position: -12px -169px;
+  height: 65px;
+  width: 60px;
+}
+.icons-myTimetable {
+  background-position: -84px -162px;
+  height: 65px;
+  width: 60px;
+}
+.icons-myProjects {
+  background-position: -158px -163px;
+  height: 65px;
+  width: 60px;
+}
+.k-state-active .icons-backlog {
+  background-position: -12px -100px;
+}
+.k-state-active .icons-myTimetable {
+  background-position: -83px -99px;
+}
+.k-state-active .icons-myProjects {
+  background-position: -156px -99px;
+}
+.active .icons-home {
+  background-position: 0 -65px;
+}
+.active .icons-addNewItem {
+  background-position: -20px -65px;
+}
+.active .icons-searchableItems {
+  background-position: -39px -65px;
+}
+.active .icons-schedule {
+  background-position: -64px -65px;
+}
+.active .icons-diagram {
+  background-position: -84px -65px;
+}
+.sidebar-content {
+  display: inline-block;
+  left: auto;
+  position: absolute;
+  top: 50%;
+  z-index: 800;
+}
+.linkButton {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+}
+.ui-widget-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  background: #333;
+  opacity: .30;
+  filter: alpha(opacity=30);
+}
+.loadeImg {
+  width: 100px;
+  margin: 0 auto;
+}
+.loadeImg img {
+  position: absolute;
+  z-index: 99999;
+  top: 280px;
+}
+.displayN {
+  display: none;
+}
+.k-input[readonly] {
+  background-color: #eee;
+}
+.form-control {
+  border-radius: 0;
+}
+.form-group label {
+  min-width: 260px;
+  padding-left: 10px;
+}
+.form-group label.normalInput {
+  padding-bottom: 8px;
+}
+.k-block,
+.k-header,
+.k-grid-header,
+.k-toolbar,
+.k-grouping-header,
+.k-pager-wrap,
+.k-button,
+.k-draghandle,
+html .km-pane-wrapper .k-header {
+  background-color: #fff;
+}
+.tr .k-grid-header .k-header {
+  text-align: right;
+}
+.tr .k-grid tr td {
+  text-align: right;
+}
+.tc .k-grid-header .k-header {
+  text-align: center;
+}
+.tc .k-grid tr td {
+  text-align: center;
+}
+.col-xs-1,
+.col-sm-1,
+.col-md-1,
+.col-lg-1,
+.col-xs-2,
+.col-sm-2,
+.col-md-2,
+.col-lg-2,
+.col-xs-3,
+.col-sm-3,
+.col-md-3,
+.col-lg-3,
+.col-xs-4,
+.col-sm-4,
+.col-md-4,
+.col-lg-4,
+.col-xs-5,
+.col-sm-5,
+.col-md-5,
+.col-lg-5,
+.col-xs-6,
+.col-sm-6,
+.col-md-6,
+.col-lg-6,
+.col-xs-7,
+.col-sm-7,
+.col-md-7,
+.col-lg-7,
+.col-xs-8,
+.col-sm-8,
+.col-md-8,
+.col-lg-8,
+.col-xs-9,
+.col-sm-9,
+.col-md-9,
+.col-lg-9,
+.col-xs-10,
+.col-sm-10,
+.col-md-10,
+.col-lg-10,
+.col-xs-11,
+.col-sm-11,
+.col-md-11,
+.col-lg-11,
+.col-xs-12,
+.col-sm-12,
+.col-md-12,
+.col-lg-12 {
+  margin-bottom: 20px;
+}
+.one {
+  background-color: #EBEDF0;
+}
+.bgRed {
+  background-color: #d9534f;
+}
+.bgRed td {
+  color: #fff;
+  text-shadow: 1px 2px rgba(0, 0, 0, 0.5);
+}
+.bgRed td a.k-button {
+  text-shadow: none;
+}
+.bgRed td a.k-button:hover {
+  background-color: #D4D4D4;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+@media (max-width: 990px) {
+  body .wrapper .content .subTitleBar {
+    height: auto;
+    box-shadow: 3px 3px 5px #888888;
+  }
+}

@@ -1,0 +1,290 @@
+﻿@using Antlr.Runtime.Misc
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="homeBox">
+            <div id="tabstrip">
+
+                @{
+                    if (ViewBag.role == "3")
+                    {
+                    <ul>
+                        <li>
+                            <div class="homeHead">
+                                <span class="icons-myTimetable"></span>
+                                我的时间表
+                            </div>
+                        </li>
+                        <li>
+                            <div class="homeHead">
+                                <span class="icons-myProjects"></span>
+                                我的项目
+                            </div>
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="titleBar">
+                            <h3>时间表</h3>
+                        </div>
+                        <div class="main">
+                            @Html.Action("GetMyProjectUser", "Report")
+                        </div>
+                    </div>
+                    <div>
+                        <div class="titleBar">
+                            <h3>我的项目</h3>
+                        </div>
+                        <div class="main">
+                            @Html.Action("MyProject", "Index")
+                            @* @Html.Partial("MyProject");*@
+                        </div>
+                    </div>
+                    }
+                    else if (ViewBag.role == "2")
+                    {
+                    <ul>
+                        <li class="k-state-active">
+                            <div class="homeHead">
+                                <span class="icons-backlog"></span>
+                                待办事宜
+                            </div>
+                        </li>
+                        <li>
+                            <div class="homeHead">
+                                <span class="icons-myTimetable"></span>
+                                时间表
+                            </div>
+                        </li>
+                        <li>
+                            <div class="homeHead">
+                                <span class="icons-myProjects"></span>
+                                我的项目
+                            </div>
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="titleBar">
+                            <h3>待办事宜</h3>
+                        </div>
+                        <div class="main">
+                            @*<div id="trainingItem"></div>*@
+                            @* @Html.Partial("TodoProjects")*@
+                            @Html.Action("TodoProjects", "Index")
+                        </div>
+                    </div>
+                    <div>
+
+                        <div class="titleBar">
+                            <h3>时间表</h3>
+                        </div>
+                        <div class="main">
+                            @Html.Action("GetMyProjectUser", "Report")
+                        </div>
+                    </div>
+                    <div>
+                        <div class="titleBar">
+                            <h3>我的项目</h3>
+                        </div>
+                        <div class="main">
+                            @Html.Action("MyProject", "Index")
+                            @* @Html.Partial("MyProject");*@
+                        </div>
+                    </div>
+                    }
+
+                    else if (ViewBag.role == "1")
+                    {
+                    <ul>
+                        <li class="k-state-active">
+                            <div class="homeHead">
+                                <span class="icons-backlog"></span>
+                                待办事宜
+                            </div>
+                        </li>
+                        <li>
+                            <div class="homeHead">
+                                <span class="icons-myProjects"></span>
+                                我的项目
+                            </div>
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="titleBar">
+                            <h3>待办事宜</h3>
+                        </div>
+                        <div class="main">
+                            @*<div id="trainingItem"></div>*@
+                            @* @Html.Partial("TodoProjects")*@
+                            @Html.Action("TodoProjects", "Index")
+                        </div>
+                    </div>
+                    <div>
+                        <div class="titleBar">
+                            <h3>我的项目</h3>
+                        </div>
+                        <div class="main">
+                            @Html.Action("MyProject", "Index")
+                            @* @Html.Partial("MyProject");*@
+                        </div>
+                    </div>
+                    }
+
+                    else if (ViewBag.role == "5")
+                    {
+                            
+                    <ul>
+                        <li class="k-state-active">
+                            <div class="homeHead">
+                                <span class="icons-backlog"></span>
+                                待办事宜
+                            </div>
+                        </li>
+                        <li>
+                            <div class="homeHead">
+                                <span class="icons-myProjects"></span>
+                                我的项目
+                            </div>
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="titleBar">
+                            <h3>待办事宜</h3>
+                        </div>
+                        <div class="main">
+                            @*<div id="trainingItem"></div>*@
+                            @* @Html.Partial("TodoProjects")*@
+                            @Html.Action("TodoProjects", "Index")
+                        </div>
+                    </div>
+                    <div>
+                        <div class="titleBar">
+                            <h3>我的项目</h3>
+                        </div>
+                        <div class="main">
+                            @Html.Action("MyProject", "Index")
+                            @* @Html.Partial("MyProject");*@
+                        </div>
+                    </div>
+                    }
+                    else if (ViewBag.role == "4")
+                    {
+                    <ul>
+                        <li class="k-state-active">
+                            <div class="homeHead">
+                                <span class="icons-myProjects"></span>
+                                我的项目
+                            </div>
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="titleBar">
+                            <h3>我的项目</h3>
+                        </div>
+
+                        <div class="main">
+                            @Html.Action("MyProject", "Index")
+                            @* @Html.Partial("MyProject");*@
+                        </div>
+                    </div>
+                    }
+                }
+
+
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .form-control {
+        width: 80%;
+    }
+</style>
+<script>
+    $(function () {
+        //Tab
+        function onActivate(e) {
+            structure(60, 220, "menu", "slideArea");  
+        }
+        $("#tabstrip").kendoTabStrip({
+            activate: onActivate,
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            }
+        });
+        
+        //function JumpDetailPage(e) {
+        //    e.preventDefault();
+
+        //    var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        //    var accId = dataItem.CallReportId;
+        //    window.location.href = "/Html/ProjectDetails";
+
+        //}
+        //$("#trainingItem").kendoGrid({
+        //    dataSource: {
+        //        type: "odata",
+        //        transport: {
+        //            read: "http://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders"
+        //        },
+        //        schema: {
+        //            model: {
+        //                fields: {
+        //                    ShipCountry: { type: "string" },
+        //                    ShipCity: { type: "string" }
+        //                }
+        //            }
+        //        },
+        //        pageSize: 15
+        //    },
+        //    height: 430,
+        //    sortable: true,
+        //    reorderable: true,
+        //    resizable: true,
+        //    pageable: true,
+        //    columns: [
+        //         {
+        //             command: [
+        //                 {
+        //                     name: "",
+        //                     text: "查看详细",
+        //                     imageClass: "k-icon iconB-search ",
+        //                     click: JumpDetailPage
+        //                 }
+        //             ],
+        //             width:'10%'
+        //         },
+        //        {
+        //            field: "ShipCountry",
+        //            title: "培训项目",
+        //            width: '40%'
+        //        },
+        //        {
+        //            field: "ShipCity",
+        //            title: "状态",
+        //            width: '40%'
+        //        },
+        //        {
+
+        //            command: [
+        //                {
+        //                    name: "destroy",
+        //                    text: "删除",
+        //                    imageClass: "k-icon k-delete"
+        //                }
+        //            ],
+        //            width: '10%'
+        //        }
+        //    ],
+        //    editable: true
+        //});
+    });
+</script>

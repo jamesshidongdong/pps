@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "GetTeamDetail";
+}
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>时间表(依团队)</h3> 
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label> 依团队：</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择团队"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: team,
+    value: project" 
+                                    />
+                            </div>
+                             <div class="col-md-3">
+                                <label> 开始时间:</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate" 
+                                    />
+                            </div>
+                            <div class="col-md-3">
+                                <label> 结束时间：</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate" 
+                                    />
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-blueBlack hyponasty" data-bind="click: Search" type="button"><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>    
+                    </div>
+                </form>
+            </div>
+            <div class="calendarWrapper">
+                <div id="calendar" class="fc" ></div>
+            </div>
+        </div>
+
+    </div>   
+</div>
+<script>
+    function calendarFunction(org) {
+      
+        //console.log(org);
+        var calendar = $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next',
+                center: 'title',
+                right: ''
+                //right: 'month,agendaWeek,agendaDay'
+            },
+            selectable: false,
+            editable: false,
+            events: org,
+        });
+    }
+    $(function () {
+        var myDate = new Date();
+        var teamDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetTeams"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            startDate: new Date(myDate.getFullYear(), myDate.getMonth(), myDate.getDate()),
+            endingDate: new Date(myDate.getFullYear(), myDate.getMonth(), myDate.getDate()),
+            team: teamDataSource,
+                
+            Search: function (e) {
+
+                e.preventDefault();
+
+
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var submitModel = {
+                    startDate: this.startDate,
+                    endingDate: this.endingDate,
+                    teamID: this.get("project")
+                };
+              
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/GetDataByTeam",
+                    data: JSON.stringify(submitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.Statu == 1) {
+
+                            $("#calendar").html("");
+                            
+                            calendarFunction(res.Data);
+                            structure(60, 220, "menu", "slideArea");
+                            //console.log(res.Data);
+                            //setTimeout("calendarFunction("+res.Data+")", 50);
+                        }
+                    }
+                });
+
+            },
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+        //setTimeout("calendarFunction()", 500);
+    });
+</script>

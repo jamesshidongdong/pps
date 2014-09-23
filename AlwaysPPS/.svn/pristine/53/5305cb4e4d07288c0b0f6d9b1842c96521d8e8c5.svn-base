@@ -1,0 +1,6 @@
+﻿@Html.RenderNotification()
+<script type="text/javascript">
+    $(document).ready(function () {
+        app.Notification.handleAjaxNotification();
+    });
+</script>

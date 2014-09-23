@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AlwaysPPS.Library.Constant
+{
+    public sealed class DataStatus
+    {
+        public const string Active = "A";
+        public const string Deleted = "X";
+        public const string Closed = "C";
+
+        public struct ProjectState
+        {
+            public const string pendingByBuHead = "待审批";
+            public const string pendingByTrafficLeader = "待分配项目";
+            public const string pendingByTeamLeader = "待制定工作计划";
+            //public const string inprocess = "进行中";
+            public const string pendingByTeamLeaderEnd = "进行中";
+
+            public const string closed = "已结案";
+
+            public const string Reject = "已拒绝";
+        }
+
+
+
+    }
+}

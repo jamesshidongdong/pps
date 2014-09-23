@@ -1,0 +1,490 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using AlwaysPPS.Entity;
+using AlwaysFramework.DAL;
+using AlwaysPPS.Library.Constant;
+
+namespace AlwaysPPS.Service
+{
+
+    public interface IReportFormService
+    {
+        List<team> GetTeams();
+        List<Assign> GetAssigns();
+        List<HumanResources> GetResource(string begin, string end, int uid);
+        List<OaDepartment> GetDep();
+        List<string> GetMen(string department, int uid);
+        Dictionary<int, string> GetMenAtId(string department, int uid);
+        List<string> GetDates(string begin, string end);
+        int getDepID(int uid);
+        List<int> getRoleID(int uid);
+        List<int> getTeamID(int uid);
+    }
+
+    public class ReportFormService : IReportFormService
+    {
+        //fields
+        private readonly IRepository<TProjectWorkPlan> _TProjectWorkPlan;
+        private readonly IRepository<VProject> _VProject;
+        private readonly IRepository<OaEmployee> _employee;
+        private readonly IRepository<OaDepartment> _dep;
+        private readonly IRepository<TProject> _pro;
+        private readonly IRepository<TTimesheet> _sheet;
+        private readonly IRepository<TResourceTeam> _team;
+        private readonly IRepository<CtProjectType> _type;
+        private readonly IRepository<TProjectTask> _task;
+        private readonly ITResourceTeamService _ITResourceTeamService;
+
+        //method
+        public ReportFormService(IRepository<TProjectWorkPlan> _workPlan
+            , IRepository<VProject> project
+            , IRepository<OaEmployee> employee
+            , IRepository<OaDepartment> dep
+            , IRepository<TProject> pro
+            , IRepository<TTimesheet> sheet
+            , IRepository<TResourceTeam> team
+            , IRepository<CtProjectType> type
+            , IRepository<TProjectTask> task
+            , ITResourceTeamService iTResourceTeamService)
+        {
+            this._TProjectWorkPlan = _workPlan;
+            this._VProject = project;
+            this._employee = employee;
+            this._dep = dep;
+            this._pro = pro;
+            this._sheet = sheet;
+            this._team = team;
+            this._type = type;
+            this._task = task;
+            _ITResourceTeamService = iTResourceTeamService;
+        }
+        ////fields
+        //private readonly IRepository<VProject> _VProject;
+
+        ////method
+        //public TProjectWorkPlanService(IRepository<VProject> workPlan)
+        //{
+        //    this._VProject = workPlan;
+        //}
+        public int getDepID(int uid)
+        {
+            return (int)_employee.Query().Get().Where(u => u.UserId == uid).FirstOrDefault().DepartmentId;
+        }
+
+        public List<int> getRoleID(int uid)
+        {
+            return _team.Query().Get().Where(u => u.ResourceUid == uid).Select(u => u.RoleId).ToList();
+        }
+
+        public List<int> getTeamID(int uid)
+        {
+            var teamIDList = new List<int>();
+            foreach (var item in getRoleID(uid))
+            {
+                var teamID = _team.Query().Filter(u => u.RoleId == item && u.ResourceUid == uid).Get().FirstOrDefault().TeamId;
+                teamIDList.Add(teamID);
+            }
+            return teamIDList;
+        }
+
+        public List<OaDepartment> GetDep()
+        {
+            return _dep.Query().Get().ToList();
+        }
+
+        public List<string> GetMen(string department, int uid)
+        {
+            var teamList = _team.Query().Get();
+            List<int> teamIDList = getTeamID(uid);
+            var men = _team.Query().Filter(u => teamIDList.Contains(u.TeamId)).Get().Select(u => u.ResourceUid).ToList();
+            var depID = _dep.Query().Get().Where(u => u.DepartmentName == department).FirstOrDefault().DepartmentId;
+            var oaList = _employee.Query().Get().Where(u => u.DepartmentId == depID && men.Contains((int)u.UserId)).Select(u => new { u.EmployeeName, u.UserId }).ToList();
+            var human = new List<string>();
+            foreach (var oaEmployee in oaList)
+            {
+                if (!teamList.Any(k => k.ResourceUid == oaEmployee.UserId & k.RoleId == 1))
+                {
+                    human.Add(oaEmployee.EmployeeName);
+                }
+            }
+            return human;
+        }
+
+        //mensca---------------------------------
+        public Dictionary<int, string> GetMenAtId(string department, int uid)
+        {
+            var teamList = _team.Query().Get();
+            List<int> teamIDList = getTeamID(uid);
+            var men = _team.Query().Filter(u => teamIDList.Contains(u.TeamId)).Get().Select(u => u.ResourceUid).ToList();
+            var depID = _dep.Query().Get().Where(u => u.DepartmentName == department).FirstOrDefault().DepartmentId;
+            var oaList = _employee.Query().Get().Where(u => u.DepartmentId == depID && men.Contains((int)u.UserId)).Select(u => new { u.EmployeeName, u.UserId }).ToList();
+            var human = new Dictionary<int, string>();
+            foreach (var oaEmployee in oaList)
+            {
+                if (!teamList.Any(k => k.ResourceUid == oaEmployee.UserId & k.RoleId == 1))
+                {
+                    human.Add(Convert.ToInt32(oaEmployee.UserId), oaEmployee.EmployeeName);
+                }
+            }
+            return human;
+        }
+        //---------------------------------------
+
+        public List<string> GetDates(string begin, string end)
+        {
+            DateTime beginTime = DateTime.Parse(begin);
+            DateTime endTime = DateTime.Parse(end);
+            List<string> dateTimes = new List<string>();
+            int ts = (endTime - beginTime).Duration().Days;
+            for (var i = 0; i <= ts; i++)
+            {
+                DateTime newDate = beginTime.AddDays(i);
+                dateTimes.Add(newDate.ToString());
+            }
+            return dateTimes;
+            //return _sheet.Query().Get().GroupBy(u => u.Day).Select(u => u.Key.ToString()).ToList();
+        }
+        public List<HumanResources> GetResource(string begin, string end, int uid)
+        {
+            var teamList = _team.Query().Get();
+            var sheetList = _sheet.Query().Get();
+            var oaList = _employee.Query().Get();
+            var depList = _dep.Query().Get();
+            var proList = _pro.Query().Get();
+            //var teamListArray = _team.Query().Get().ToList();
+            // var humans = oaList.Where(u=>teamListArray.Any(k=>k.ResourceUid==u.UserId&k.RoleId!=1)).Select(u => new { u.UserId, u.EmployeeName }).ToList();
+            var humans = new List<int>();
+
+            var res = _ITResourceTeamService.GetCurrentUInts(uid);
+            humans = res;
+            //foreach (var oaEmployee in oaList.ToList())
+            //{
+            //    if (oaEmployee!=null)
+            //    {
+            //        if (!teamList.Any(k => k.ResourceUid == oaEmployee.UserId & k.RoleId == 1))
+            //        {
+            //            humans.Add((int)oaEmployee.UserId);
+            //        }
+            //    }
+
+            //}
+            // var dates = sheetList.GroupBy(u => u.Day).Select(u => u.Key).ToList();
+            var dates = GetDates(begin, end);
+            List<HumanResources> mList = new List<HumanResources>();
+            foreach (var i in dates)
+            {
+                foreach (var h in humans)
+                {
+                    List<int> PIDList = new List<int>();
+                    HumanResources hu = new HumanResources();
+                    hu.uid = (int)h;
+                    hu.dates = i;
+                    var dt = DateTime.Parse(i);
+                    var proID = sheetList.Where(u => u.ResourceUid == h && u.Day == dt);
+                    if (proID.Count() > 0)
+                    {
+                        var proIDList = proID.Select(u => u.ProjectId).ToList();
+                        foreach (var item in proIDList)
+                        {
+                            if (!proList.Any(u => u.ProjectId == item))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+
+                                hu.proID = item;
+                                PIDList.Add(item);
+                                // break;
+                            }
+
+                        }
+
+                    }
+                    else
+                    {
+                        hu.proID = -9999;
+                    }
+
+                    var hours = sheetList.Where(u => u.ResourceUid == h && u.Day == dt && PIDList.Contains(u.ProjectId));
+                    if (hours.Count() > 0)
+                    {
+                        hu.totalHours = 0;
+                        //*************************************//
+                        //var pCode = (proList.Where(p => p.ProjectId == hu.proID));
+                        var pCode = (proList.Where(p => PIDList.Contains(p.ProjectId)));
+                        if (pCode.Count() > 0)
+                        {
+
+                            foreach (var hh in hours.ToList())
+                            {
+                                hu.pCode =
+                                    proList.Where(p => p.ProjectId == hh.ProjectId).FirstOrDefault().ProjectName;
+                                hu.hours = hh.NumOfHours.ToString();
+                                string content = hu.pCode + "(" + hu.hours + ")" + "<br>";
+                                hu.content += content;
+                                hu.totalHours += hh.NumOfHours;
+                                var status = proList.Where(u => u.ProjectId == hh.ProjectId);
+                                if (status.Count() > 0)
+                                {
+                                    hu.status = proList.FirstOrDefault(u => u.ProjectId == hh.ProjectId).State;
+                                }
+                                else
+                                {
+                                    hu.status = "";
+                                }
+                            }
+                            if (hu.status == DataStatus.ProjectState.pendingByTeamLeaderEnd || hu.status == DataStatus.ProjectState.closed)
+                            {
+                                hu.content = hu.content.Substring(0, hu.content.Length - 4);
+                            }
+                            else
+                            {
+                                hu.content = "";
+                                hu.totalHours = -9999;
+                            }
+                        }
+                        else
+                        {
+                            hu.pCode = "";
+                            hu.content = "";
+                            hu.totalHours = -9999;
+                        }
+
+                    }
+                    else
+                    {
+                        hu.hours = "0";
+                        hu.content = "";
+                        hu.totalHours = -9999;
+                    }
+
+
+                    var deps = oaList.Where(u => u.UserId == h);
+                    if (deps.Count() > 0)
+                    {
+                        int depID = (int)deps.FirstOrDefault().DepartmentId;
+                        var deptModel = depList.Where(u => u.DepartmentId == depID).FirstOrDefault();
+                        if (deptModel != null)
+                        {
+                            hu.dep = deptModel.DepartmentName;
+                        }
+                        else
+                        {
+                            hu.dep = "";
+                        }
+
+                    }
+                    else
+                    {
+                        hu.dep = "";
+                    }
+
+
+                    //hu.names = i.EmployeeName;
+                    mList.Add(hu);
+                }
+            }
+            var zx = (from u in mList
+                      from d in teamList
+                      where u.uid == d.ResourceUid
+                      select new HumanResources() { teamID = d.TeamId, uid = u.uid, dates = u.dates, hours = u.hours, dep = u.dep, content = u.content, totalHours = u.totalHours, status = u.status }).ToList();
+            return zx;
+        }
+
+        public List<team> GetTeams()
+        {
+            var z = _sheet.Query().Get().Select(u => new { u.ProjectId, u.ResourceUid }).Distinct().ToList();
+            // var zx = _TProjectWorkPlan.Query().Get().Count();
+            var tt = new List<team>();
+            foreach (var i in z)
+            {
+                team t = new team();
+                var proName = _pro.Query().Get().Where(u => u.ProjectId == i.ProjectId);
+                if (proName.Any())
+                {
+                    t.proName = proName.FirstOrDefault().ProjectName;
+                    if (t.proName == null)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                var dates = _sheet.Query().Get().Where(u => u.ProjectId == i.ProjectId);
+                if (dates.Count() > 0)
+                {
+                    t.dates = _sheet.Query().Get().Where(u => u.ProjectId == i.ProjectId).FirstOrDefault().Day;
+                }
+                else
+                {
+                    t.dates = null;
+                }
+
+
+                t.uid = i.ResourceUid;
+
+                if (_employee.Query().Get().Where(u => u.UserId == t.uid).Any())
+                {
+                    t.name = _employee.Query().Get().Where(u => u.UserId == t.uid).FirstOrDefault().EmployeeName;
+                    if (t.name == null)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    t.name = "";
+                    continue;
+                }
+                int projectID = i.ProjectId;
+                var teamLeader = _pro.Query().Filter(u => u.ProjectId == projectID).Get();
+                if (teamLeader.Any())
+                {
+                    //var leadID0 = (from u in _team.Query().Get()
+                    //    where u.ResourceUid == t.uid && u.RoleId == 3
+                    //    /* && u.TeamId == t.teamID*/
+                    //    select u.ManagerUid).FirstOrDefault();
+                    var leadID0 = teamLeader.FirstOrDefault().AssignedToUid;
+                    t.leadID = (int)leadID0;
+                    if (_team.Query()
+                        .Filter(u => u.ResourceUid == t.uid && u.RoleId == 3).Get().Any())
+                    {
+                        var id = _team.Query()
+                            .Filter(u => u.ResourceUid == t.uid && u.RoleId == 3).Get().FirstOrDefault().ManagerUid;
+                        if (!_team.Query()
+                        .Filter(u => u.ResourceId == id && u.RoleId == 2 && u.ResourceUid == t.leadID).
+                        Get().Any())
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    t.leadID = -9999;
+                    continue;
+                }
+                var lead = _employee.Query().Get().Where(u => u.UserId == t.leadID);
+                if (lead.Count() > 0)
+                {
+                    t.lead = lead.FirstOrDefault().EmployeeName;
+                    if (t.lead == null)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    t.lead = "";
+                }
+                var depId2 = _employee.Query().Get().Where(u => u.UserId == t.leadID);
+                if (depId2.Count() > 0)
+                {
+                    int depId = (int)depId2.FirstOrDefault().DepartmentId;
+                    t.dep = _dep.Query().Get().Where(u => u.DepartmentId == depId).FirstOrDefault().DepartmentName;
+                }
+                else
+                {
+                    int depId = -9999;
+                    t.dep = "";
+                }
+                t.teamID = _team.Query().Filter(u => u.ResourceUid == t.leadID).Get().FirstOrDefault().TeamId;
+                if (_pro.Query().Get().Where(u => u.ProjectId == i.ProjectId).Any())
+                {
+                    t.status = _pro.Query().Filter(u => u.ProjectId == i.ProjectId).Get().FirstOrDefault().State;
+                }
+                else
+                {
+                    continue;
+                }
+                tt.Add(t);
+
+            }
+
+
+            var list = tt.Distinct().ToList();
+            return list;
+        }
+
+        public List<Assign> GetAssigns()
+        {
+            var teamList = _team.Query().Get();
+            var sheetList = _sheet.Query().Get();
+            var planList = _TProjectWorkPlan.Query().Get();
+            var oaList = _employee.Query().Get();
+            var depList = _dep.Query().Get();
+            var proList = _pro.Query().Get();
+            var taskList = _task.Query().Get();
+            var types = _type.Query().Get();
+            //List<int> assignUids = (from u in taskList
+            //    where (from t in planList group t by t.ProjectId into g select g.Key).Contains((int) u.ProjectId)
+            //    select (int)u.AssigneeUid).ToList();
+            //var teamIDList = (from u in assignUids
+            //    from t in teamList
+            //    where u == t.ResourceUid
+            //    select new{t.TeamId,t.ResourceUid}).ToList();
+
+
+            var zxx = (from u in proList
+                       where (from t in planList group t by t.ProjectId into g select g.Key).Contains(u.ProjectId)
+
+                       join c in planList on u.ProjectId equals c.ProjectId into h
+                       from bb in h
+
+                       //where (from t in planList group t by t.ProjectId into g select g.Key).Contains(bb.ProjectId)
+                       select
+                           new
+                           {
+                               u.AssignedToUid,
+                               bb.ResourceUid,
+                               at = h.Sum(x => x.ActualEffort),
+                               pt = h.Sum(x => x.PlanEffort),
+                               u.Deadline,
+                               u.RequestedDate,
+                               u.ProjectId,
+                               u.ProjectTypeId,
+                               u.State
+                           }).Distinct().ToList();
+            var zx = (from u in zxx
+                      join c in teamList on u.AssignedToUid equals c.ResourceUid into g
+                      from b in g
+                      where (b.RoleId == 2 || b.RoleId == 1)
+                      select new { b.TeamId, u }).ToList();
+
+            var wp = new List<Assign>();
+
+            foreach (var i in zx)
+            {
+                Assign s = new Assign();
+                //s.date = i.ActualEndDate.ToString();
+                int dep = (int)types.FirstOrDefault(u => u.ProjectTypeId == i.u.ProjectTypeId).DepartmentId;
+                s.dep = depList.FirstOrDefault(u => u.DepartmentId == dep).DepartmentName;
+                s.factDate = i.u.RequestedDate.ToString();
+                //s.planDate = i.PlanStartDate.ToString();
+                s.factEndDate = i.u.Deadline.ToString();
+                //s.planEndDate = i.PlanEndDate.ToString();
+                s.proName = proList.Where(u => u.ProjectId == i.u.ProjectId).FirstOrDefault().ProjectName;
+                s.pTime = i.u.pt.ToString();
+                s.fTime = i.u.at.ToString();
+                s.teamID = i.TeamId;
+                s.status = i.u.State;
+                wp.Add(s);
+            }
+
+            return wp.Distinct().ToList();
+        }
+    }
+}

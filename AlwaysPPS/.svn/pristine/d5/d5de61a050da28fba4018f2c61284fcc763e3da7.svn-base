@@ -1,0 +1,115 @@
+﻿ <div class="tc">
+     <div id="MyProjectsItem"></div>
+ </div>        
+
+<script>
+    function onDataBound(e) {
+        
+        var grid = $("#MyProjectsItem").data("kendoGrid");
+        
+        for (var i = 0; i < e.sender._data.length; i++) {
+
+            var data = e.sender._data[i];
+            var ddd = data.DeadlineF + " 00:00:00";
+            var dt = new Date(ddd);
+            var now = new Date();
+            
+            //var tt= new Date(now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate() + " 00:00:00")
+            var hour = (dt - now) / (1000 * 3600);
+            console.log(data.ProjectId +  "\tpro "+i+" "+hour);
+            if (hour < 48) {
+                var rowNumber = i + 1;
+                $("#MyProjectsItem").find("tr:eq(" + rowNumber + ")").addClass('bgRed');
+            }
+
+
+        }
+    }
+
+    $(function ()  {
+        function JumpDetailPage(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.ProjectId;
+            window.location.href = "/Project/GetMyProjectDetail?id=" + accId;
+           
+        }
+
+        $("#MyProjectsItem").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: '@Url.Action("GetMyProject", "Index")'
+                }
+            },
+            //height:800,
+            //sortable: true,
+            //reorderable: true,
+            resizable: true,
+            pageable: false,
+            columns: [
+            
+                {
+                    command: [
+                        {
+                            name: " ",
+                            text: "详情",
+                            imageClass: "k-icon iconB-search ",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '80px',
+                    attributes: { style: "text-align: center; " }
+                },
+                {
+                    field: "State",
+                    title: "状态",
+                    width: '10%'
+                },
+                {
+                    field: "ProjectName",
+                    title: "项目名称",
+                    width: '15%'
+                },
+                {
+                    field: "DepartmentNames",
+                    title: "部门",
+                    width: '10%'
+                },
+                {
+                    field: "ClientName",
+                    title: "客户",
+                    width: '10%'
+                },
+                {
+                    field: "RequestorName",
+                    title: "申请人",
+                    width: '15%'
+                }, 
+                {
+                    field: "AssignedToName",
+                    title: "负责人",
+                    width: '15%'
+                },
+                {
+                    field: "RequestedDateF",
+                    title: "创建时间",
+                    width: '15%'
+                },
+                {
+                    field: "DeadlineF",
+                    title: "项目完稿/比稿日期",
+                    width: '15%'
+                }
+            ],dataBound: function (e) {
+              
+                structure(60, 220, "menu", "slideArea");
+                onDataBound(e);
+
+            }
+            //editable: true
+        });
+       
+    });    
+  
+</script>

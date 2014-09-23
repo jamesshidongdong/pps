@@ -1,0 +1,108 @@
+﻿<div class="main">
+    <div id="HumanResourcePlanningGrid"></div>
+</div>
+<script>
+    $(function() {
+        var  dataSource = new kendo.data.DataSource({
+                            transport: {
+                                read:  {
+                                    url: '@Url.Action("GetHumanPlanning","Project", new {projectId = @ViewBag.projectID})',
+                                    dataType: "json"
+                                },
+                                update: {
+                                    url: '@Url.Action("UpdateHumanPlanning","Project")',
+                                    dataType: "josn",
+                                    type: "post"
+                                },
+                                destroy: {
+                                    url: '@Url.Action("DeleteHumanPlanning","Project")',
+                                    dataType: "josn",
+                                    type: "post"
+                                },
+                                create: {
+                                    url: '@Url.Action("AddHumanPalnning","Project")',
+                                    dataType: "json",
+                                    type:"post"
+                                },
+                                parameterMap: function(options, operation) {
+                                    if (operation !== "read" && options.models) {
+                                        return {models: kendo.stringify(options.models),projectId:'@ViewBag.projectID'};
+                                    }
+                                }
+                            },
+                            requestEnd: function(e) {                                
+                                var type = e.type;
+                                if (type === "create") {
+                                    //var response = e.response;
+                                    //app.Notification.generic(response.Statu, response.Msg)
+                                    $('#HumanResourcePlanningGrid').data('kendoGrid').dataSource.read();
+                                    window.location = "/Report/ProjectDetail/"+@ViewBag.projectID;
+                                }
+                                
+                            },
+                            batch: true,
+                            pageSize: 7,
+                            schema: {
+                                model: {
+                                    id: "ProjectWorkPlanId",
+                                    fields: {
+                                        ProjectWorkPlanId: { editable: false, nullable: true },
+                                        ProjectId: { editable: false, nullable: true },
+                                        teamMember: { validation: { required: true }, defaultValue: { ResourceUid: 0, EmployeeName: "AAA" } },
+                                        Task: { },
+                                        PlanStartDate: { type: "date", validation: { required: true } },
+                                        PlanEndDate: { type: "date", validation: { required: true } },
+                                        PlanEffort: { type: "number", validation: { required: true, min: 0.5,step:0.5} },
+                                        ActualEffort: { editable: false, nullable: true }
+                                    }
+                                }
+                            }
+                        });
+
+
+        //初始化grid
+        $("#HumanResourcePlanningGrid").kendoGrid({
+            autoBind: true,
+            dataSource: dataSource,
+            navigatable: true,
+            pageable: true,
+            height: 350,
+            @if (ViewBag.IsCanEdit)
+            {
+            <text>   
+            toolbar: ["create", "save", "cancel"],
+            editable: true,
+            </text>
+            }
+            columns: [
+                
+                { @if (ViewBag.IsCanEdit)
+                  {<text> command: "destroy", width: "5%"</text>} },
+                { field: "teamMember", title: "人员", width: " 10%", editor: empDropDownEditor, template: "#=teamMember.EmployeeName#" },
+                //{ field: "ResourceUid", title: "人员", width: " 20%"},
+                { field: "Task", title: "任务说明", width: " 45%" },
+                { field: "PlanStartDate", title: "计划开始日期", format: "{0:yyyy/MM/dd}", width: "10%" },
+                { field: "PlanEndDate", title: "计划结束日期",  format: "{0:yyyy/MM/dd}",width: "10%" },
+                { field: "PlanEffort", title: "预计工时", format: "{0:0.0}", width: "10%" },
+                { field: "ActualEffort", title: "实际工时", width: "10%", editable: false }
+            ]
+            
+             });
+    });
+
+    function empDropDownEditor(container, options) {
+        //console.log(options.field);
+        $('<input required data-value-field="ResourceUid" data-text-field="EmployeeName" data-option-label="请选择" data-bind="value:' + options.field + '"/>')
+                        .appendTo(container)
+                        .kendoDropDownList({
+                            autoBind: false,
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: '@Url.Action("GetAllTeamMembers", "Project")'
+                                }
+                            }
+                        });
+                }
+
+</script>

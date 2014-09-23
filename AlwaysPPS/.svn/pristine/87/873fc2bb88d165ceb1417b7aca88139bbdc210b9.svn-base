@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AlwaysPPS.Entity.StoredProcedure
+{
+    using  System.Data.SqlClient;
+    public  class SpGetPlanTime:BaseProcedure
+    {
+        public int ProjectId { get; set;}
+        public DateTime starttime { get; set; }
+        public DateTime endtime { get; set; }
+
+        public const string NAME = "uspGetPlantime @teamID ";
+        
+        public  static SqlParameter[] Parameters(PlanTimeParameter parameter)
+        {
+            SqlParameter[] parameters =
+                {
+                    new SqlParameter("@teamID", parameter.teamID),
+                };
+            return parameters;
+        }
+    }
+}

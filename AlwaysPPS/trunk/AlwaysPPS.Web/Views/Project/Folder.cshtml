@@ -1,0 +1,237 @@
+﻿<div class="main">
+    <div id="FileGrid"></div>
+</div>
+<div id="addArea" style="display: none" class="clearfix">
+    <form class="form-horizontal" role="form" action='@Url.Action("AddProjectDoc")' method="POST" id="formUpload">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10" style="margin-left:28px;">
+                    <label for="inputEmail3" >文件类型</label><br />@*control-label*@
+                    
+                        <input name="docType" type="text" class="form-control" id="styleFile"   style="width:100px"
+                                data-role="dropdownlist"
+                                data-auto-bind="false"
+                                data-value-primitive="true"
+                                data-option-label="请选择"
+                                data-text-field="Text"
+                                data-value-field="Value"
+                                data-bind="value: selectFile, source: fileType"
+                                required  />
+                   
+                </div>
+                <div class="col-sm-10" style="margin-left:28px;">
+                    <label for="inputPassword3" >上传文件</label>
+                   
+                        <input name="files" class="form-control" type="file" id="upLoads" style="width:80%"
+                               data-role="upload"
+                               data-multiple="false"
+                               data-localization="{select: '上传文件'}"
+                               data-async="{ autoUpload: false }"
+                               data-bind="events: { select: onSelect }"
+                            />
+                           
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-sm-offset-9 col-sm-1">
+                <button type="button" class="btn btn-default" data-bind="click: Submit">提交</button>
+            </div>
+        </div>
+        <input type="hidden" name="ProjectId" value="@ViewBag.projectID"/>
+    </form>
+</div>
+<script src="~/Scripts/jquery.fileDownload.js"></script>
+<script>
+   
+    $(function () {
+       
+        function downloadDoc(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            //var state = dataItem.State;
+            var fileUrl = dataItem.DocumentFileName;
+            var docId = dataItem.DocumentId;
+            
+            var downloadURL = '@Url.Action("DownloadDocument","Project")?documentId=' + docId;
+            //todo: use jquery downloader to download the file
+            $.fileDownload(downloadURL, {
+                httpMethod: "POST",
+                data: docId,
+                successCallback: function(url) {
+                    //$(".firms-loading").hide();
+                },
+                failCallback: function(responseHtml, url) {
+                    app.Notification.warning("There was a problem generating your report, please try again.");
+                    //$(".firms-loading").hide();
+                }
+            });
+
+            //window.location.href = fileUrl;
+        };
+
+        function deleteDoc(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            //var state = dataItem.State;
+            var Id = dataItem.DocumentId;
+            if(window.confirm("确认删除"))
+            $.ajax({
+                type: 'Post',
+                url: "/Project/DeleteProjectDoc",
+                data: { projectId: Id },
+                success: function (data) {
+                    //$('#FileGrid').data('kendoGrid').setDataSource(dataSource);
+                    $('#FileGrid').data('kendoGrid').dataSource.read();
+                }
+            });
+
+        }
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url:  '@Url.Action("GetProjectDoc", "Project",new { projectId = @ViewBag.projectID })'
+                },
+                create: {
+                    url: "/Project/AddProjectDoc",
+                    dataType: "json",
+                    type: "post",
+
+                },
+                parameterMap: function (options, operation) {
+
+                    if (operation !== "read" && options.models) {
+
+                        return { models: kendo.stringify(options.models), projectId: '@ViewBag.projectID' };
+                    }
+                }
+            },
+            batch: false,
+            pageSize: 7
+        });
+
+        //初始化grid
+        $("#FileGrid").kendoGrid({
+            dataSource: dataSource,
+            navigatable: true,
+            sortable: true,
+            reorderable: true,
+            resizable: true,
+            pageable: true,
+            
+            height: 350,
+            @if (ViewBag.IsCanEdit)
+              {
+                  <text>
+                toolbar: [
+               {
+                   text: "添加文件",
+                   className: "k-grid-custom addBtn",
+                   imageClass: "k-icon k-si-plus"
+               }],
+                </text>
+              }
+            columns: [
+                {
+                    @if (ViewBag.IsCanEdit)
+                    {
+                    <text>
+                    command: [
+                           {
+                               name: "1",
+                               text: "删除",
+                               imageClass: "k-icon k-delete",
+                               click: deleteDoc
+                           }
+                    ], width: "10%",
+                    attributes: { style: "text-align: center; " }
+
+                    </text>
+                    }
+                },
+                { field: "DocumentName", title: "文件名称", width: " 40%" },
+                { field: "DocumentType", title: "文件类型", width: " 40%" },
+                {
+                    command: [
+                        {
+                            name: "2",
+                            text: "下载",
+                            imageClass: "k-icon iconB-download-alt",
+                            click: downloadDoc
+                        }
+                    ],
+                    width: "15%"
+                }
+            ],
+            editable: "popup"
+        });
+        //添加文件弹出框
+        var addArea = $("#addArea");
+        $(".addBtn").bind("click", function () {
+            addArea.data("kendoWindow").open().center();
+        });
+        if (!addArea.data("kendoWindow")) {
+            addArea.kendoWindow({
+                width: "450px",
+                //height: "250px",
+                resizable: false,
+                modal: true,
+                title: "添加文件",
+                actions: [
+                    "Close"
+                ],
+                pinned: true,
+                position: { top: 100 },
+                close: function () {
+                    
+                    $("#styleFile").data("kendoDropDownList").select(0);
+                    $(".k-upload").find(".k-upload-status").remove();
+                    $(".k-upload").find(".k-upload-files").remove();
+                    $(".k-upload").addClass("k-upload-empty");
+                }
+            });
+        }
+
+
+        //弹出框MVVM        
+        var addAreaViewModel = kendo.observable({
+            fileType: new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: '@Url.Action("GetDocType","Project")',
+                        dataType: "json"
+                    }
+                }
+            }),
+            onSelect: function (e) {
+                var multiFiles = $.map(e.files, function(file) {
+                    var info = file.name;
+
+                    return info;
+                }) || null;
+
+                if (multiFiles !== null) {
+                    this.set("selectedFile", multiFiles);
+                }
+            },
+            selectedFile: "", 
+            selectFile: "",// this is type
+            Submit: function(e) {
+                var theselectFile = this.get("selectFile");
+                var theFile = this.get("selectedFile");
+               
+                if (!theFile || !theselectFile) {
+                    toastr("数据不能为空!");
+                    return false;
+                } 
+                //debugger;
+                $("#formUpload").submit();
+            }
+        });
+        kendo.bind($("#addArea"), addAreaViewModel);
+        
+    });
+</script>

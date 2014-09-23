@@ -1,0 +1,504 @@
+﻿@{
+    ViewBag.Title = "报表（人力资源概括）";
+}
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>报表（人力资源概括）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label> 开始时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate" 
+                                       id="beginTime"
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 结束时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate" 
+                                       id="endTime" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 部门</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: departments,
+    value: department"                  
+                                        
+                                       id="department"
+                                    readonly="readonly"
+                                    />
+                            </div>
+                        </div>
+                        <div class="row">
+                            @{
+                                if(ViewBag.Istraffic=="1")
+                                {
+                                     <div class="col-md-4">
+                                <label> Team</label><br/>
+                                   <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择Team"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: team, value: selectTeam" id="selTeam"/>
+                            </div>
+                                }
+                            }
+                           
+                            <div class="col-md-4">
+                                <label> 立项部门</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择立项部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: foundedDepartment,
+    value: selectFoundedDepartment"                  
+                                        
+                                     id="buildDepart"  
+                                    />
+                            </div>
+                            <div class="col-md-4 ">
+                                
+                                <button class="btn btn-blueBlack hyponasty"  id="excels"  data-bind="click: Export" type="button" ><i class="icon-list-alt"></i>&nbsp;&nbsp;导出</button>
+                                <button class="btn btn-blueBlack hyponasty" id="searchs" data-bind="click: Submit" type="button" ><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                       @* <div class="row">
+                            <div class="col-md-4 col-md-offset-8">
+                                
+                                <button class="btn btn-blueBlack hyponasty"  id="excels"  data-bind="click: Export" type="button" ><i class="icon-list-alt"></i>&nbsp;&nbsp;导出</button>
+                                <button class="btn btn-blueBlack hyponasty" id="searchs" data-bind="click: Submit" type="button" ><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>*@
+                    </div>
+                </form>
+            </div>
+           
+            <div id="tabHumanResource">
+                <ul>
+                    <li class="k-state-active">
+                        列表
+                    </li>
+                    <li>
+                        图表
+                    </li>
+                        
+                </ul>
+                <div>
+                    <div id="searchGrid" class="hrSummaryTableWapper fakeContainer">@*<table id="grid" class="table hrSummaryTable table-bordered"></table>*@</div>
+                </div>
+                <div>
+                    <div class="chart">
+                        <div class="chartTitle">按客户查看工时</div>
+                        <div id="clienteleCheck" class="chartMain" ></div>
+                    </div>
+                    <div class="chart">
+                        <div class="chartTitle">按部门查看工时</div>
+                        <div id="departmentCheck" class="chartMain" ></div>
+                    </div>
+                    <div class="chart">
+                        <div class="chartTitle">按项目查看工时</div>
+                        <div id="projectCheck" class="chartMain" ></div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        //tab
+        function onActivate(e) {
+            structure(60, 220, "menu", "slideArea");
+        }
+        $("#tabHumanResource").kendoTabStrip({
+            //activate: onActivate,
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            }
+        });
+        var departmentsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/getDepartment"
+                }
+            }
+        });
+        var teamDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/GetTeams"
+                }
+            }
+        });
+        var foundedDepartmentDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/GetBuheadDepart"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            departments: departmentsDataSource,
+            team: teamDataSource,
+            foundedDepartment: foundedDepartmentDataSource,
+
+            startDate: "",
+            endingDate: "",
+            department: '@ViewBag.depts',
+            selectTeam: null,
+            selectFoundedDepartment: null,
+            Submit: function (e) {
+
+                e.preventDefault();
+
+                var st = $("#endTime").val();
+                var et = $("#endTime").val();
+                if (st == "" || et == "") {
+                    app.Notification.error("开始或结束时间不能为空！");
+                    return false;
+                }
+
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                //var submitModel = {
+                //    beginTime: this.startDate,
+                //    endTime: this.endingDate,
+                //    department: this.get("department")
+                //};
+                
+                //location.href =@Url.Action("getHumanResource","ReportForm") + "?beginTime" + $("#beginTime").val() + "&endTime=" + $("#endTime").val() + "&department=" + $("#department").val() + "&selTeam=" + $("#selTeam").val() + "&buildDepart=" + $("#buildDepart").val();
+               
+                $.ajax({
+                    type: 'get',
+                    url: "/ReportForm/getHumanResource",
+                    //data: kendo.stringify(submitModel),
+                    data: "beginTime=" + $("#beginTime").val() + "&endTime=" + $("#endTime").val() + "&department=" + $("#department").val() + "&selTeam=" + $("#selTeam").val() + "&buildDepart=" + $("#buildDepart").val(),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'html',
+                    cache:false,
+                    success: function (script) {
+                        //eval(script);
+                       
+                        $("#searchGrid").html($.trim(script));
+                        var contentHeadH = $(window).height() - 430;
+                        $(".hrSummaryTableWapper").attr('style', 'height:' + contentHeadH + 'px');
+                        var mySt = new superTable("grid", {
+                            cssSkin: "sSky",
+                            fixedCols: 1,
+                            headerRows: 1
+                        });
+                        structure(60, 220, "menu", "slideArea");
+                    },
+                    beforeSend:function() {
+                        loade();
+                    },
+                    complete:function() {
+                        loadeStop();
+                        
+                           
+                       
+                    }
+                });
+
+            },
+            Export: function (e) {
+                if ($("#beginTime").val() == "" || $("#endTime").val() == "") {
+                    app.Notification.warning("请填写日期");
+                    return false;
+                }
+                if ($("#department").val() == "") {
+                    app.Notification.warning("请填写部门");
+                    return false;
+                }
+                e.preventDefault();
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                
+                if (!searchBar.validate()) {
+                    return false;
+                } else {
+                    location.href = "/ReportForm/SaveToExcelX?beginTime=" + $("#beginTime").val() + "&endTime=" + $("#endTime").val() + "&department=" + $("#department").val() + "&selTeam=" + $("#selTeam").val() + "&buildDepart=" + $("#buildDepart").val();
+                }
+                //Save to Server            
+
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+        //页面跳转
+        function JumpDetailPage(e) {
+            e.preventDefault();
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.CallReportId;
+            window.location.href = "/Html/ProjectDetails";
+
+        }
+        $("#searchGrids").kendoGrid({
+            dataSource: {
+                type: "odata",
+                transport: {
+                    read: "http://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders"
+                },
+                schema: {
+                    model: {
+                        fields: {
+                            OrderID: { type: "number" },
+                            ShipCountry: { type: "string" },
+                            ShipCity: { type: "string" },
+                            ShipName: { type: "string" },
+                            OrderDate: { type: "date" },
+                            ShippedDate: { type: "date" }
+                        }
+                    }
+                },
+                pageSize: 15
+            },
+            height: 430,
+            sortable: true,
+            reorderable: true,
+            resizable: true,
+            pageable: true,
+            columns: [
+                {
+                    field: "OrderDate",
+                    title: "Order Date",
+                    width: 110,
+                    format: "{0:MM/dd/yyyy}"
+                },
+                {
+                    field: "ShipCountry",
+                    title: "Ship Country",
+                    width: 110
+                },
+                {
+                    field: "ShipCity",
+                    title: "Ship City",
+                    width: 110
+                },
+                {
+                    field: "ShipName",
+                    title: "Ship Name",
+                    width: 200
+                },
+                {
+                    field: "ShippedDate",
+                    title: "Shipped Date",
+                    format: "{0:MM/dd/yyyy}"
+                },
+                {
+                    field: "OrderID",
+                    title: "ID",
+                    width: 60
+                },
+                {
+                    command: [
+                        {
+                            name: "",
+                            text: "查看详细",
+                            imageClass: "k-icon iconB-search ",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '10%',
+                    attributes: { style: "text-align: center; " }
+                }
+            ]
+        });
+    })
+
+    //报表
+    //function clienteleCheck() {
+    //    $("#clienteleCheck").kendoChart({
+    function createChart() {
+        $("#clienteleCheck").kendoChart({
+            title: false,
+            legend: {
+                position: "bottom"
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#%"
+                }
+            },
+            series: [{
+                type: "pie",
+                startAngle: 150,
+                data: [{
+                    category: "Asia",
+                    value: 53.8,
+                    color: "#9de219"
+                }, {
+                    category: "Europe",
+                    value: 16.1,
+                    color: "#90cc38"
+                }, {
+                    category: "Latin America",
+                    value: 11.3,
+                    color: "#068c35"
+                }, {
+                    category: "Africa",
+                    value: 9.6,
+                    color: "#006634"
+                }, {
+                    category: "Middle East",
+                    value: 5.2,
+                    color: "#004d38"
+                }, {
+                    category: "North America",
+                    value: 3.6,
+                    color: "#033939"
+                }]
+            }],
+            tooltip: {
+                visible: true,
+                format: "{0}%"
+            }
+        });
+        $("#departmentCheck").kendoChart({
+            title: false,
+            legend: {
+                position: "bottom"
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#%"
+                }
+            },
+            series: [{
+                type: "pie",
+                startAngle: 150,
+                data: [{
+                    category: "Asia",
+                    value: 53.8,
+                    color: "#9de219"
+                }, {
+                    category: "Europe",
+                    value: 16.1,
+                    color: "#90cc38"
+                }, {
+                    category: "Latin America",
+                    value: 11.3,
+                    color: "#068c35"
+                }, {
+                    category: "Africa",
+                    value: 9.6,
+                    color: "#006634"
+                }, {
+                    category: "Middle East",
+                    value: 5.2,
+                    color: "#004d38"
+                }, {
+                    category: "North America",
+                    value: 3.6,
+                    color: "#033939"
+                }]
+            }],
+            tooltip: {
+                visible: true,
+                format: "{0}%"
+            }
+        });
+        $("#projectCheck").kendoChart({
+            title: false,
+            legend: {
+                position: "bottom"
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#%"
+                }
+            },
+            series: [{
+                type: "pie",
+                startAngle: 150,
+                data: [{
+                    category: "Asia",
+                    value: 53.8,
+                    color: "#9de219"
+                }, {
+                    category: "Europe",
+                    value: 16.1,
+                    color: "#90cc38"
+                }, {
+                    category: "Latin America",
+                    value: 11.3,
+                    color: "#068c35"
+                }, {
+                    category: "Africa",
+                    value: 9.6,
+                    color: "#006634"
+                }, {
+                    category: "Middle East",
+                    value: 5.2,
+                    color: "#004d38"
+                }, {
+                    category: "North America",
+                    value: 3.6,
+                    color: "#033939"
+                }]
+            }],
+            tooltip: {
+                visible: true,
+                format: "{0}%"
+            }
+        });
+    }
+    
+    $(function () {
+        createChart();
+    })
+</script>

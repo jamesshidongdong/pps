@@ -1,0 +1,315 @@
+﻿
+
+@{
+    ViewBag.Title = "项目详情";
+
+    var teamsSource = ViewBag.teams as List<SelectListItem>;
+}
+
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>项目详情</h3>
+        </div>
+        <div class="subTitleBar">
+            <div class="row">
+                <div class="col-md-3">
+                    <b class="title">项目编号：</b>
+                    <span class="details">@ViewBag.project.ProjectCode</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建日期：</b>
+                    <span class="details">@ViewBag.project.RequestedDate.ToString("yyyy-MM-dd")</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建人：</b>
+                    <span class="details">@ViewBag.RequestName</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">状态：</b>
+                    <span class="details">@ViewBag.project.State</span>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div id="addNewItem" class="addNewItemBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>项目名称</label>
+                                <input type="text" class="form-control" style="width:100%;"
+                                       data-auto-bind="false"
+                                       data-bind="value: projectName" 
+                                       readonly="readonly" />
+                            </div>
+                            <div class="col-md-6">
+                                <label >客&nbsp;&nbsp;&nbsp;&nbsp;户</label>
+                                <input type="text" class="form-control" id="clientName" style="width:100%;"
+                                       data-role="autocomplete"
+                                       data-auto-bind="false"
+                                       data-bind="source: clients,
+    value: client" 
+                                       readonly="readonly" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>项目类别</label>
+
+                                <input type="text" class="form-control" style="width:100%;"
+                                       data-auto-bind="false"
+                                       data-bind="value: projectType" 
+                                       readonly="readonly"/>
+                            </div>
+                            <div class="col-md-4">
+                                <label >部&nbsp;&nbsp;&nbsp;&nbsp;门</label>
+
+                                
+                                <input type="text" class="form-control" style="width:100%;"
+                                       data-auto-bind="false"
+                                       data-bind="value: department" 
+                                       readonly="readonly"  />
+                              
+                            </div>
+                           
+                            <div class="col-md-4">
+                                <label>完稿/比稿日期</label>
+                                <input class="form-control"  style="width:100%;"
+                                       data-role="datepicker"
+                                       data-bind="value: deadline"
+                                       readonly="readonly" />                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>项目介绍</label>
+                        <textarea class="form-control" readonly="readonly" rows="3" data-auto-bind="false" data-bind="value: projectIntroduction" style="width:100%;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            @{
+                                if (ViewBag.role == "1")
+                                {
+                                    if (ViewBag.project.State == "待分配项目")
+                                    { <div class="col-md-2">
+                                        <label>项目执行团队</label>
+                                        <input  type="text" class="form-control" style="width:100%;"
+                                               data-role="dropdownlist"
+                                               data-auto-bind="false"
+                                               data-option-label="请选择团队"
+                                               data-value-primitive="true"
+                                               data-text-field="Text"
+                                               data-value-field="Value"
+                                               data-bind="value: ProjectTeam,
+    source: ProjectTeams" 
+                                            />
+                                    </div> }
+
+                                }
+                                if (ViewBag.role == "2")
+                                {
+                                  
+                                        <div class="col-md-2">
+                                            <label>项目执行团队</label>
+                                            <input type="text" class="form-control" style="width:100%;"
+                                                   data-auto-bind="false"
+                                                   data-bind="value: team" 
+                                                   readonly="readonly"  />
+                                        </div>
+                                   
+                                }
+
+                            }
+
+                           
+                        </div>
+                    </div>
+                     @{
+                         if (ViewBag.role == "1")
+                         {
+                             if (ViewBag.project.State == "待分配项目")
+                             {
+                                 <div class="buttonTeam">
+                                     <button id="btnTijiao" class="btn btn-blueBlack" data-bind="click: Add" type="button"><i class="icon-ok-sign"></i>&nbsp;&nbsp;提交</button>
+                                 </div>
+                             }
+                         }
+                         else if (ViewBag.role == "2")
+                         {
+                             if (ViewBag.project.State == "进行中")
+                             {
+                                 <div class="buttonTeam">
+                                     <button id="btnTijiao" class="btn btn-blueBlack" data-bind="click: Jian" type="button"><i class="icon-ok-sign"></i>&nbsp;&nbsp;结案</button>
+                                 </div>
+                             }
+                         }
+                         }
+                         </
+                         form>
+            </div>
+            <div class="panelbarWrapper">
+                <ul id="panelbar">
+                    @{
+                        if (ViewBag.role == "1")
+                        {
+                            <li class="@ViewBag.mileClass">
+                                项目时间表
+                                @*@Url.Action("Milestone","Project",new {projectId=@ViewBag.project.ProjectId})*@
+                                <div></div>
+                            </li>
+                         <li>
+                                工作安排
+                                <div>@*@Url.Action("HumanResourcePlanning","Project",new {projectId=@ViewBag.project.ProjectId})*@</div>
+                            </li>
+                            if (ViewBag.isLoveDesing != false)
+                            {
+                                <li class="@ViewBag.fileClass">
+                                文件
+                                <div>@*@Url.Action("Folder","Project",new {projectId=@ViewBag.project.ProjectId})*@</div>
+                               </li>
+                            }
+
+                        }
+                        if (ViewBag.role == "2")
+                        {
+                            <li  class="@ViewBag.mileClass">
+                                项目时间表
+                                
+                                <div>@*@Url.Action("Milestone","Project",new {projectId=@ViewBag.project.ProjectId})*@</div>
+                            </li>
+                            <li>
+                                工作安排
+                                <div>@*@Url.Action("HumanResourcePlanning","Project",new {projectId=@ViewBag.project.ProjectId})*@</div>
+                            </li>
+                            if (ViewBag.isLoveDesing != false)
+                            {
+                                <li class="@ViewBag.fileClass">
+                                    文件
+                                
+                                    <div>@*@Url.Action("Folder","Project",new {projectId=@ViewBag.project.ProjectId})*@</div>
+                                </li>
+                            }
+                        }
+
+                        }
+                   
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        //$("li").addClass("k-state-active");
+        kendo.culture("zh-CN");
+        var clientsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            type: "aspnetmvc-ajax",
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetClient",
+                    data: function() {
+                        var keyword = $("#clientName").data("kendoAutoComplete").value() || "";
+                        return { client: keyword };
+                    }
+                }
+            }
+        });
+
+
+        var addNewItemModel = kendo.observable({
+            clients: clientsDataSource,
+            ProjectTeams: @Html.Raw(Json.Encode(teamsSource)),
+            team: '@Html.Raw(ViewBag.teamName)',
+
+
+            projectName: '@Html.Raw(ViewBag.project.ProjectName)',
+            department: '@Html.Raw(ViewBag.deptName)',
+            client: '@Html.Raw(ViewBag.project.ClientName)',
+
+            projectType: '@Html.Raw(ViewBag.projectTypeName)',
+            deadline: '@ViewBag.project.Deadline',
+            projectIntroduction: '@Html.Raw(ViewBag.project.ProjectDescription)',
+            isPrimitive: false,
+
+
+            Add: function(e) {
+                e.preventDefault();
+                var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+                if (!editTraining.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var SubmitModel = {
+                    ProjectTeam: this.ProjectTeam,
+                    projectID: '@ViewBag.project.ProjectId',
+                };
+
+
+                $.ajax({
+                    type: 'Post',
+                    url: "/Project/ToTeame",
+                    data: kendo.stringify(SubmitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.Statu == "1") {
+                            window.location="/Project/GetMyProjectDetail?id="+'@ViewBag.project.ProjectId';
+                            //$("#btnTijiao").css("display", "none");
+                        }
+                    }
+                });
+
+            },
+            Jian: function(e) {
+                e.preventDefault();
+                var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+                if (!editTraining.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var SubmitModel = {
+                    ProjectTeam: this.ProjectTeam,
+                    projectID: '@ViewBag.project.ProjectId',
+                };
+
+                if(window.confirm("是否结案?"))
+                    {
+                $.ajax({
+                    type: 'Post',
+                    url: "/Project/Jian",
+                    data: kendo.stringify(SubmitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.Statu == "1") {
+                            window.location="/Project/GetMyProjectDetail?id="+'@ViewBag.project.ProjectId';
+                            //$("#btnTijiao").css("display", "none");
+                        }
+                    }
+                });}
+
+            },
+
+        });
+        kendo.bind($("#addNewItem"), addNewItemModel);
+        function onActivate(e) {
+            structure(60, 220, "menu", "slideArea");
+        }
+        //面板条
+        $("#panelbar").kendoPanelBar({
+            activate: onActivate,
+            expandMode: "single",
+            contentUrls: [
+                '/Project/Milestone/' + '@ViewBag.project.ProjectId',
+                '/Project/HumanResourcePlanning?projectId=' + '@ViewBag.project.ProjectId',
+                '/Project/Folder?projectId=' + '@ViewBag.project.ProjectId'
+            ]
+        });
+    });
+   
+</script>
+

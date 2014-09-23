@@ -1,0 +1,134 @@
+﻿
+        
+<div>
+    <input type="hidden" id="uidTmp" />
+    <input type="hidden" id="hiddenst" />
+    <input type="hidden" id="hiddenet" />
+    <div id="searchGrid" class="clearfix">
+    </div>
+</div>
+       
+
+<script>
+
+    function preWeek() {
+        var dt = new Date($("#hiddenst").val().replace(/-/, "/"));
+        var submitModel = {
+            dtTime: dt,
+            uid: $("#uidTmp").val(),
+        };
+        $.ajax({
+            type: 'Post',
+            url: "/Report/GetProjectHtmlByUser",
+            data: kendo.stringify(submitModel),
+            contentType: "application/json; charset=utf-8",
+
+            cache: false,
+            success: function(res) {
+                if (res.Statu == 1) {
+                    $("#searchGrid").html(res.Data.sbHtml);
+
+                    $("#hiddenst").val(res.Data.STime);
+                    $("#hiddenet").val(res.Data.ETime);
+                }
+            }
+        });
+    }
+
+    function nextWeek() {
+        var et = new Date($("#hiddenet").val().replace(/-/, "/"));
+        var submitModel = {
+            dtTime: et,
+            uid: $("#uidTmp").val(),
+        };
+        $.ajax({
+            type: 'Post',
+            url: "/Report/GetProjectHtmlByUser",
+            data: kendo.stringify(submitModel),
+            contentType: "application/json; charset=utf-8",
+
+            cache: false,
+            success: function(res) {
+                if (res.Statu == 1) {
+                    $("#searchGrid").html(res.Data.sbHtml);
+
+                    $("#hiddenst").val(res.Data.STime);
+                    $("#hiddenet").val(res.Data.ETime);
+                }
+            }
+        });
+    }
+
+    var isAdd = true;
+
+    function add() {
+
+        var res = [];
+        $("input", $("#tbList")).each(function(i, ele) {
+            var item = {
+                ProjectId: $(ele).attr("data-proId"),
+                ResourceUid: $(ele).attr("data-userid"),
+                Day: $(ele).attr("data-time"),
+                NumOfHours: $(ele).val(),
+            };
+            res.push(item);
+            var re = new RegExp("^(([1-9])|(1[0-9])|(2[0-4]))([.]{1}[0-9]+){0,1}$");
+            var datas = $(ele).val();
+            if (datas != "") {
+                if (datas != "上周" && datas != "下周")
+                {
+                if (re.test(datas) == false) {
+                    $(ele).css("border-color", "red");
+                    isAdd = false;
+                    return false;
+                } else {
+                    $(ele).css("border-color", "#808080");
+                    isAdd = true;
+                }}
+            }
+        });
+        if (isAdd) {
+            $.ajax({
+                url: "@Url.Action("AddTimeSheet", "Project")",
+            data: JSON.stringify(res),
+            type: "POST",
+            contentType: 'application/json;charset=UTF-8',
+            dataType: "json",
+            succsess: function(res) {}
+
+            });}else {
+            app.Notification.error("请填写正确的时间！");
+        }
+    }
+
+    $(function() {
+        var res = @ViewBag.IsMy;
+        var userid=@ViewBag.uid;
+        if (res == "1") {
+
+            var d = new Date();
+            var str = d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate();
+            var submitModel = {
+                dtTime: str,
+                uid: userid,
+            };
+            $.ajax({
+                type: 'Post',
+                url: "/Report/GetProjectHtmlByUser",
+                data: kendo.stringify(submitModel),
+                contentType: "application/json; charset=utf-8",
+
+                cache: false,
+                success: function (res) {
+                    if (res.Statu == 1) {
+                        $("#searchGrid").html(res.Data.sbHtml);
+
+                        $("#hiddenst").val(res.Data.STime);
+                        $("#hiddenet").val(res.Data.ETime);
+                        $("#uidTmp").val(res.Data.uid);
+                    }
+                }
+            });
+        }
+    })
+</script>

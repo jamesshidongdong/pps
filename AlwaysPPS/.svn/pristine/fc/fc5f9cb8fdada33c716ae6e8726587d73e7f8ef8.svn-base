@@ -1,0 +1,250 @@
+﻿@{
+    ViewBag.Title = "AddNewItem";
+    var ptSource = ViewBag.ProType as List<SelectListItem>;
+}
+
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>新增项目</h3>
+        </div>
+        <div class="subTitleBar" style="display: none">
+            <div class="row">
+                <div class="col-md-3">
+                    <b class="title">项目编号：</b>
+                    <span class="details"></span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建日期：</b>
+                    <span class="details"></span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建人：</b>
+                    <span class="details"></span>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div id="addNewItem" class="addNewItemBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>项目名称</label><br/>
+                                <input id="proNameID" type="text" class="form-control" style="width:100%;"
+                                       data-auto-bind="false"
+                                       data-bind="value: projectName" 
+                                    />
+                            </div>
+                            <div class="col-md-6">
+                                <label >客&nbsp;&nbsp;&nbsp;&nbsp;户</label><br/>
+                                <input id="clientNameID" type="text" class="form-control" style="width:100%;"
+                                       data-role="autocomplete"
+                                       data-auto-bind="false"
+                                       data-bind="source: clients, value: client" 
+                                    />
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>项目类别</label><br/>
+
+                                 <select id="projectTypeID"
+                                         style="width:100%;"
+                                         data-role="dropdownlist"
+                                         data-auto-bind="false"
+                                         data-value-primitive="true"
+                                         data-option-label="请选择类别"
+                                         data-text-field="Text"
+                                         data-value-field="Value"
+                                         data-bind="value: projectType, source: projectTypes" >
+                                    </select>
+
+                            </div>
+                            <div class="col-md-4">
+                                <label >部&nbsp;&nbsp;&nbsp;&nbsp;门</label><br/>
+
+                                @{
+                                    if (ViewBag.role == "4" || ViewBag.role == "5")
+                                    {
+                                        <input id="tmpdepartmentID"  style="width:100%;" id="@ViewBag.deptID " type="text" class="form-control"
+                                     readonly="readonly"
+                                     value="@ViewBag.deptNames" 
+                                    />
+                                    }
+                                    else
+                                    {
+                                         <select  style="width:100%;" id="departmentID"
+                                         data-cascade-from="projectTypeID"
+                                         data-role="dropdownlist"
+                                         data-auto-bind="false"
+                                         data-value-primitive="true"
+                                         data-option-label="请选择部门"
+                                         data-text-field="Text"
+                                         data-value-field="Value"
+                                         data-bind="value: department,
+                                         source: depts" >
+                               </select>
+                                    }
+                                }
+                               
+                            </div>
+                           
+                            <div class="col-md-4">
+                                <label>完稿/比稿日期</label><br/>
+                                <input id="deadlineID" class="form-control" style="width:100%;"
+                                       data-role="datepicker"
+                                       data-bind="value: deadline"
+                                    />                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>项目介绍</label><br/>
+                        <textarea class="form-control" id="textareaID" rows="3" data-auto-bind="false" data-bind="value: projectIntroduction"></textarea>
+                    </div>
+                    <div class="buttonTeam">
+                        <button class="btn btn-blueBlack" data-bind="click: Submit" type="button"><i class="icon-ok-sign"></i>&nbsp;&nbsp;提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        kendo.culture("zh-CN");
+        var clientsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            type: "aspnetmvc-ajax",
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetClient",
+                    data: function () {
+                        var keyword = $("#clientNameID").data("kendoAutoComplete").value();
+                        return { client: keyword };
+                    }
+                }
+            }
+        });
+
+
+
+
+        var departmentDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetDepart",
+                    data: function() {
+                        return {projectTypeID:$("#projectTypeID").val()}
+                    },
+                    type:'POST'
+                }
+            }
+        });
+
+        var addNewItemModel = kendo.observable({
+            clients: clientsDataSource,
+            departments: departmentDataSource,
+            projectTypes: @Html.Raw(Json.Encode(ptSource)),
+            depts: departmentDataSource,
+            projectName: null,
+            department:null,
+            client: null,
+            projectType: null,
+            deadline: null,
+            projectIntroduction: null,
+            isPrimitive: false,
+            
+           
+
+            Submit: function (e) {
+                e.preventDefault();
+               
+                if ($("#proNameID").val() == "") {
+                    app.Notification.error("项目名称不能为空！");
+                    return false;
+                }
+                if ($("#clientNameID").val() == "") {
+                    app.Notification.error("客户不能为空！");
+                    return false;
+                }
+                if ($("#projectTypeID option:selected").val() == "") {
+                    app.Notification.error("项目类别不能为空！");
+                    return false;
+                }
+               
+                if ($("#departmentID option:selected").val() == "") {
+                    app.Notification.error("部门不能为空！");
+                    return false;
+                }
+
+                if ($("#deadlineID").val() == "") {
+                    
+                    app.Notification.error("项目完稿/比稿日期不能为空！");
+                    return false;
+                }
+
+                if ($("#textareaID").val() == "") {
+                    
+                    app.Notification.error("项目介绍不能为空！");
+                    return false;
+                }
+
+                var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+                if (!editTraining.validate()) {
+                    return false;
+                }
+                var deptidtmp = "";
+                var dept = $("#tmpdepartmentID").val();
+                if(dept!=undefined&&dept!="") {
+                    deptidtmp = $("#tmpdepartmentID").attr("did");
+                } else {
+                    deptidtmp = this.get("department");
+                }
+                //console.log(deptidtmp);
+                //Save to Server            
+                var SubmitModel = {
+                    projectName: this.projectName,
+                    client: this.client,
+                    department: deptidtmp,
+                    projectType: this.get("projectType"),
+                    deadline: this.deadline,
+                    projectIntroduction: this.projectIntroduction,
+                };
+                //console.log(SubmitModel);
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/Add",
+                    data: kendo.stringify(SubmitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    beforeSend:function() {
+                        loade();
+                    }, 
+                    complete:function() {
+                        loadeStop();
+                    }, 
+                    success: function (res) {
+                        if (res.Statu == 1) {
+                            var datas = res.Data;
+                            window.location = "/Project/GetMyProjectDetail?id="+datas;
+                            //$("#projectTypeID").data("kendoDropDownList").select(0);
+                            //$("#proNameID").val("");
+                            //$("#clientNameID").val("");
+                            //$("#deadlineID").val("");
+                            //$("#textareaID").val("");
+
+                        }
+                    }
+                });
+           
+            },
+        });
+        kendo.bind($("#addNewItem"), addNewItemModel);
+    })
+</script>

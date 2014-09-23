@@ -1,0 +1,85 @@
+﻿<div class="main">
+    <div id="MilestoneGrid"></div>
+</div>
+<script>
+    $(function() {
+        var  dataSource = new kendo.data.DataSource({
+            transport: {
+                read:  {
+                    url: '@Url.Action("GetMilestone", "Project", new { projectId = @ViewBag.projectID })',
+                    dataType: "json"
+                },
+                update: {
+                    url: '@Url.Action("UpdateMilestone", "Project")',
+                                    dataType: "josn"
+                                },
+                destroy: {
+                    url: '@Url.Action("DeleteMilestone", "Project")',
+                                    dataType: "josn",
+                                },
+                create: {
+                    url: '@Url.Action("Add", "Project")',
+                                    dataType: "json",
+                                    type:'POST',
+                                },
+                parameterMap: function(options, operation) {
+                    if (operation !== "read" && options.models) {
+                        return {models: kendo.stringify(options.models),projectId:@ViewBag.projectID};
+                                    }
+                                }
+            }, 
+            requestEnd: function(e) {                                
+                var type = e.type;
+               
+                if (type !== "read") {
+                    //将整个列表数据重新加载
+                    $('#MilestoneGrid').data('kendoGrid').dataSource.read();
+                    //window.location = "/Project/GetMyProjectDetail?id="+@ViewBag.projectID;
+                }
+                                
+            },
+            batch: true,
+           
+            schema: {
+                model: {
+                    id: "ProjectMilestoneId",
+                    fields: {
+                        ProjectMilestoneId: { editable: false, nullable: true },
+                        ProjectId: { editable: false, nullable: true },
+                        MilestoneName: { validation: { required: true } },
+                        ActualEndDate: { type: "date",format: "{0:yyyy/MM/dd HH:mm}", validation: { required: true } },
+                    }
+                }
+            }
+        });
+
+
+        //初始化grid
+        $("#MilestoneGrid").kendoGrid({
+            autoBind: true,
+            dataSource: dataSource,
+            navigatable: true,
+           
+            height: 350,
+            @if (ViewBag.IsCanEdit)
+            {
+            <text>   
+            toolbar: ["create"],
+            editable: "popup",
+            </text>
+            }
+            columns: [
+                
+                { @if (ViewBag.IsCanEdit)
+                  {<text> command: ["destroy","edit"], title: "", width: " 15%"</text>} },
+                { field: "MilestoneName", title: "关键点", width: " 70%" },
+                { field: "ActualEndDate", title: "时间",  format: "{0:yyyy/MM/dd HH:mm}",width: "15%" }
+            ], dataBound: function (e) {
+                structure(60, 220, "menu", "slideArea");
+            }
+            
+        });
+    });
+    
+    
+</script>

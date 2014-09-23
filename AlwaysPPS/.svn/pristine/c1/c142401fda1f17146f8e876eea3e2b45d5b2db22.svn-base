@@ -1,0 +1,218 @@
+﻿@{
+    ViewBag.Title = "SearchableItems";
+}
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>搜索项目</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-2">
+                                
+                                <input type="text" class="form-control" 
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-option-label="请选择项目编码"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: itemCoding,
+                                                    value: itemCodes" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                
+                                <input type="text" class="form-control" 
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-option-label="请选择客户"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: customers,
+                                                    value: customer" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                
+                                <input type="text" class="form-control" 
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-option-label="请选择状态"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: status,
+                                                    value: statusCode" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-blueBlack" data-bind="click: Submit" type="button" ><i class="icon-ok-sign"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="searchGrid"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        var itemCodingDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetProjectCodeList"
+                }
+            }
+        });
+        var customersDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetClientNameList"
+                }
+            }
+        });
+        var statusDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetStatusCodeList"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            itemCoding: itemCodingDataSource,
+            customers: customersDataSource,
+            status: statusDataSource,
+
+            
+            itemCodes: null,
+            customer: null,
+            statusCode: null,
+
+            Submit: function (e) {
+
+                e.preventDefault();
+
+
+
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var submitModel = {
+                    itemCodes: this.get("itemCodes"),
+                    customer: this.get("customer"),
+                    statusCode: this.get("statusCode")
+                };
+
+                app.Notification.success("from view");
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/Add",
+                    data: kendo.stringify(submitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (script) {
+                        //eval(script);
+                    }
+                });
+
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+        //页面跳转
+        function JumpDetailPage(e) {
+            e.preventDefault();
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.CallReportId;
+            window.location.href = "/Html/ProjectDetails";
+
+        }
+        $("#searchGrid").kendoGrid({
+            dataSource: {
+                type: "odata",
+                transport: {
+                    read: "http://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders"
+                },
+                schema: {
+                    model: {
+                        fields: {
+                            OrderID: { type: "number" },
+                            ShipCountry: { type: "string" },
+                            ShipCity: { type: "string" },
+                            ShipName: { type: "string" },
+                            OrderDate: { type: "date" },
+                            ShippedDate: { type: "date" }
+                        }
+                    }
+                },
+                pageSize: 15
+            },
+            height: 430,
+            sortable: true,
+            reorderable: true,
+            resizable: true,
+            pageable: true,
+            columns: [
+                {
+                    field: "OrderDate",
+                    title: "Order Date",
+                    width: 110,
+                    format: "{0:MM/dd/yyyy}"
+                },
+                {
+                    field: "ShipCountry",
+                    title: "Ship Country",
+                    width: 110
+                },
+                {
+                    field: "ShipCity",
+                    title: "Ship City",
+                    width: 110
+                },
+                {
+                    field: "ShipName",
+                    title: "Ship Name",
+                    width: 200
+                },
+                {
+                    field: "ShippedDate",
+                    title: "Shipped Date",
+                    format: "{0:MM/dd/yyyy}"
+                },
+                {
+                    field: "OrderID",
+                    title: "ID",
+                    width: 60
+                },
+                {
+                    command: [
+                        {
+                            name: "",
+                            text: "查看详细",
+                            imageClass: "k-icon iconB-search ",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '10%'
+                }
+            ]
+        });
+    })
+</script>

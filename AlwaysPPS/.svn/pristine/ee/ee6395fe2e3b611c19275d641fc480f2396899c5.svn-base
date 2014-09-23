@@ -1,0 +1,107 @@
+using System;
+using AlwaysFramework.DAL;
+using AlwaysFramework.DAL.Providers.EntityFramework;
+using AlwaysPPS.Data;
+using AlwaysPPS.Entity;
+using AlwaysPPS.Entity.StoredProcedure;
+using AlwaysPPS.Library;
+using AlwaysPPS.Service;
+using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Configuration;
+using AlwaysPPS.Service;
+
+namespace AlwaysPPS.Web.App_Start
+{
+    /// <summary>
+    /// Specifies the Unity configuration for the main container.
+    /// </summary>
+    public class UnityConfig
+    {
+        #region Unity Container
+        private static Lazy<IUnityContainer> container = new Lazy<IUnityContainer>(() =>
+        {
+            var container = new UnityContainer();
+            RegisterTypes(container);
+            return container;
+        });
+
+        /// <summary>
+        /// Gets the configured Unity container.
+        /// </summary>
+        public static IUnityContainer GetConfiguredContainer()
+        {
+            return container.Value;
+        }
+        #endregion
+
+        /// <summary>Registers the type mappings with the Unity container.</summary>
+        /// <param name="container">The unity container to configure.</param>
+        /// <remarks>There is no need to register concrete types such as controllers or API controllers (unless you want to 
+        /// change the defaults), as Unity allows resolving a concrete type even if it was not previously registered.</remarks>
+        public static void RegisterTypes(IUnityContainer container)
+        {
+            // NOTE: To load from web.config uncomment the line below. Make sure to add a Microsoft.Practices.Unity.Configuration to the using statements.
+            // container.LoadConfiguration();
+
+            string AlwaysPPSContext = UnityIOC.Context.AlwaysPPS;
+            string AlwaysHRContext = UnityIOC.Context.AlwaysHR;
+
+
+            container.RegisterType<IDataContext, AlwaysPPSDataEntryDbContext>(AlwaysPPSContext,new PerRequestLifetimeManager());
+            container.RegisterType<IDataContext, AlwaysHRDataEntryDbContext>(AlwaysHRContext,new PerRequestLifetimeManager());
+
+            container.RegisterType<IUnitOfWork, UnitOfWork>(UnityIOC.UOF.AlwaysPPS, new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IUnitOfWork, UnitOfWork>(UnityIOC.UOF.AlwaysHR, new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysHRContext)));
+            //container.RegisterType<IUnitOfWork, UnitOfWork>(new PerRequestLifetimeManager());
+
+            //todo: add service
+            container.RegisterType<IProjectService, ProjectService>(new PerRequestLifetimeManager());
+            container.RegisterType<ITResourceTeamService, TResourceTeamService>(new PerRequestLifetimeManager());
+            container.RegisterType<ICtProjectTypeService, CtProjectTypeService>(new PerRequestLifetimeManager());
+            container.RegisterType<IOaEmployeeService, OaEmployeeService>(new PerRequestLifetimeManager());
+            container.RegisterType<ITProjectTaskService, TProjectTaskService>(new PerRequestLifetimeManager());
+            container.RegisterType<ICtTeamService, CtTeamService>(new PerRequestLifetimeManager());
+            container.RegisterType<ITProjectMilestoneService, TProjectMilestoneService>(new PerRequestLifetimeManager());
+            container.RegisterType<IProjectWorkPlanService, ProjectWorkPlanService>(new PerRequestLifetimeManager());
+            container.RegisterType<IProjectDocumentService, ProjectDocumentService>(new PerRequestLifetimeManager());
+            container.RegisterType<IReportFormService, ReportFormService>(new PerRequestLifetimeManager());
+            container.RegisterType<ITTimesheetService, TTimesheetService>(new PerRequestLifetimeManager());
+            container.RegisterType<ICtProjectMileStoneTemplateService, CtProjectMileStoneTemplateService>(new PerRequestLifetimeManager());
+            container.RegisterType<IOaDepartment, OaDepartmentService>(new PerRequestLifetimeManager());
+            container.RegisterType<ISpRPTTeamTimeSheetServer, PRPTTeamTimeSheetServer>(new PerRequestLifetimeManager());
+            container.RegisterType<ISpRPTByTeamTimeSheetServer, PRPTByTeamTimeSheetServer>(new PerRequestLifetimeManager());
+            //todo: add repository
+
+            container.RegisterType<IRepository<CtEmailTemplate>, Repository<CtEmailTemplate>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtMilestone>, Repository<CtMilestone>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtMilestoneTemplate>, Repository<CtMilestoneTemplate>>(new PerRequestLifetimeManager(),new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtProjectType>, Repository<CtProjectType>>(new PerRequestLifetimeManager(),new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtRole>, Repository<CtRole>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtTeam>, Repository<CtTeam>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<SUserAccessLog>, Repository<SUserAccessLog>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProject>, Repository<TProject>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProjectTask>, Repository<TProjectTask>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProjectDocument>, Repository<TProjectDocument>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProjectMilestone>, Repository<TProjectMilestone>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProjectWorkPlan>, Repository<TProjectWorkPlan>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TResourceTeam>, Repository<TResourceTeam>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TTimesheet>, Repository<TTimesheet>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<OaDepartment>, Repository<OaDepartment>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysHRContext)));
+            container.RegisterType<IRepository<OaEmployee>, Repository<OaEmployee>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysHRContext)));
+            container.RegisterType<IRepository<VProject>, Repository<VProject>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<SpSearchProject>, Repository<SpSearchProject>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<SpGetPlanTime>, Repository<SpGetPlanTime>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProjectWorkPlan>, Repository<TProjectWorkPlan>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<VProjectWorkPlan>, Repository<VProjectWorkPlan>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<TProjectDocument>, Repository<TProjectDocument>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtDocumentType>, Repository<CtDocumentType>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<CtProjectMileStoneTemplate>, Repository<CtProjectMileStoneTemplate>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<SpRPTTeamTimeSheet>, Repository<SpRPTTeamTimeSheet>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+            container.RegisterType<IRepository<SpRPTByTeamTimeSheet>, Repository<SpRPTByTeamTimeSheet>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+
+
+            container.RegisterType<IRepository<VTeamMember>, Repository<VTeamMember>>(new PerRequestLifetimeManager(), new InjectionConstructor(new ResolvedParameter<IDataContext>(AlwaysPPSContext)));
+
+        }
+    }
+}

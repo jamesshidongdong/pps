@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1B24022B-FD1E-47F7-B17A-01525C2D4992}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AlwaysPPS.Data</RootNamespace>
+    <AssemblyName>AlwaysPPS.Data</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AlwaysFramework.DAL">
+      <HintPath>..\packages\AlwaysFramework\AlwaysFramework.DAL.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AlwaysHRDataEntryDbContext.cs" />
+    <Compile Include="AlwaysPPSDataEntryDbContext.cs" />
+    <Compile Include="Mapping\CtDocumentTypeConfiguration.cs" />
+    <Compile Include="Mapping\CtEmailTemplateConfiguration.cs" />
+    <Compile Include="Mapping\CtMilestoneConfiguration.cs" />
+    <Compile Include="Mapping\CtMilestoneTemplateConfiguration.cs" />
+    <Compile Include="Mapping\CtProjectTypeConfiguration.cs" />
+    <Compile Include="Mapping\CtRoleConfiguration.cs" />
+    <Compile Include="Mapping\CtTaskTypeConfiguration.cs" />
+    <Compile Include="Mapping\CtTeamConfiguration.cs" />
+    <Compile Include="Mapping\OaDepartmentConfiguration.cs" />
+    <Compile Include="Mapping\OaEmployeeConfiguration.cs" />
+    <Compile Include="Mapping\OaJobGradeConfiguration.cs" />
+    <Compile Include="Mapping\OaOrganisationChartConfiguration.cs" />
+    <Compile Include="Mapping\SUserAccessLogConfiguration.cs" />
+    <Compile Include="Mapping\SysdiagramConfiguration.cs" />
+    <Compile Include="Mapping\TProjectConfiguration.cs" />
+    <Compile Include="Mapping\TProjectDocumentConfiguration.cs" />
+    <Compile Include="Mapping\TProjectMilestoneConfiguration.cs" />
+    <Compile Include="Mapping\TProjectTaskConfiguration.cs" />
+    <Compile Include="Mapping\TProjectWorkPlanConfiguration.cs" />
+    <Compile Include="Mapping\TResourceTeamConfiguration.cs" />
+    <Compile Include="Mapping\TTimesheetConfiguration.cs" />
+    <Compile Include="Mapping\VProjectConfiguration.cs" />
+    <Compile Include="Mapping\VProjectWorkPlanConfiguration.cs" />
+    <Compile Include="Mapping\VTeamMemberConfiguration.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AlwaysPPS.Entity\AlwaysPPS.Entity.csproj">
+      <Project>{e2108467-a0dd-4d11-9c34-56c2c133646f}</Project>
+      <Name>AlwaysPPS.Entity</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

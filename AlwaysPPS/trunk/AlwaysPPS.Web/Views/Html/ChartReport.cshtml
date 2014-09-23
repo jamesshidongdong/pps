@@ -1,0 +1,194 @@
+﻿@{
+    ViewBag.Title = "ChartReport";
+}
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>报表（项目分配）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-2">
+                                
+                                <input type="text" class="form-control" 
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value:startDate" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                
+                                <input type="text" class="form-control" 
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value:endingDate" 
+                                    />
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <button class="btn btn-blueBlack" data-bind="click: Submit" type="button" style="margin-top: 5px;"><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="chart">
+                <div class="chartTitle">项目</div>
+                <div id="graphTableEntry" class="chartMain"></div>
+            </div>
+            <div class="chart">
+                <div class="chartTitle">实际消耗时间</div>
+                <div id="consumptionTime" class="chartMain"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        var dataSource;
+        var searchBarModel = kendo.observable({
+            
+            startDate: "",
+            endingDate: "",
+
+            Submit: function(e) {
+
+                e.preventDefault();
+
+
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var submitModel = {
+                    startDate: this.startDate,
+                    endingDate: this.endingDate
+                };
+                $.ajax({
+                    type: 'Post',
+                    url: "/ReportForm/GetAssign",
+                    data: kendo.stringify(submitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function(script) {
+                        //eval(script);\
+                        dataSource = script;
+                    }
+                });
+
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+        $('#graphTableEntry').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: "",
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            global: {
+                canvasToolsURL: false
+            },
+            exporting: {
+                buttons: {
+                    contextButton: {
+                        enabled:false
+                    }
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: '项目比例',
+                data: [
+                    ['A项目', 45.0],
+                    ['B项目', 26.8],
+                    {
+                        name: 'C项目',
+                        y: 12.8,
+                        sliced: true,
+                        selected: true
+                    },
+                    ['D项目', 8.5],
+                    ['E项目', 6.2],
+                    ['F项目', 0.7]
+                ]
+            }]
+        });
+        $('#consumptionTime').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: "",
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            global: {
+                canvasToolsURL: false
+            },
+            exporting: {
+                buttons: {
+                    contextButton: {
+                        enabled: false
+                    }
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: '实际消耗时间',
+                //data: [
+                //    ['A项目', 45.0],
+                //    ['B项目', 26.8],
+                //    {
+                //        name: 'C项目',
+                //        y: 12.8,
+                //        sliced: true,
+                //        selected: true
+                //    },
+                //    ['D项目', 8.5],
+                //    ['E项目', 6.2],
+                //    ['F项目', 0.7]
+                //]
+                data:dataSource
+            }]
+        });
+    })
+</script>
+

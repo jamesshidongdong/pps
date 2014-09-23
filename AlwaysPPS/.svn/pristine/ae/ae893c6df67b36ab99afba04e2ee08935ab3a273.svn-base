@@ -1,0 +1,288 @@
+﻿@{
+    ViewBag.Title = "报表（人力资源概括）";
+}
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>报表（人力资源概括）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label> 开始时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate" 
+                                       id="beginTime"
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 结束时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate" 
+                                       id="endTime" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 部门</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: departments,
+    value: department"                  
+                                        
+                                       id="department"
+                                    />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label> Team</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择Team"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: team,
+    value: selectTeam"                  
+                                        
+                                       
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 立项部门</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择立项部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: foundedDepartment,
+    value: selectFoundedDepartment"                  
+                                        
+                                       
+                                    />
+                            </div>
+                            <div class="col-md-4 ">
+                                
+                                <button class="btn btn-blueBlack hyponasty"  id="excels"  data-bind="click: Export" type="button" ><i class="icon-list-alt"></i>&nbsp;&nbsp;导出</button>
+                                <button class="btn btn-blueBlack hyponasty" id="searchs" data-bind="click: Submit" type="button" ><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                       @* <div class="row">
+                            <div class="col-md-4 col-md-offset-8">
+                                
+                                <button class="btn btn-blueBlack hyponasty"  id="excels"  data-bind="click: Export" type="button" ><i class="icon-list-alt"></i>&nbsp;&nbsp;导出</button>
+                                <button class="btn btn-blueBlack hyponasty" id="searchs" data-bind="click: Submit" type="button" ><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>*@
+                    </div>
+                </form>
+            </div>
+            <div id="dashboardLoading" style="text-align: center; display: none;">
+                <img src="../../Content/images/loader.gif" alt="" />
+            </div>
+            <div id="searchGrid"><table id="grid" class="table hrSummaryTable table-bordered"></table></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+
+
+        var departmentsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/getDepartment"
+                }
+            }
+        });
+        var teamDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/getDepartment"
+                }
+            }
+        });
+        var foundedDepartmentDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/getDepartment"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            departments: departmentsDataSource,
+            team: teamDataSource,
+            foundedDepartment: foundedDepartmentDataSource,
+
+            startDate: "",
+            endingDate: "",
+            department: null,
+            selectTeam: null,
+            selectFoundedDepartment: null,
+            Submit: function (e) {
+
+                e.preventDefault();
+
+
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                //var submitModel = {
+                //    beginTime: this.startDate,
+                //    endTime: this.endingDate,
+                //    department: this.get("department")
+                //};
+                $.ajax({
+                    type: 'get',
+                    url: "/ReportForm/getHumanResource",
+                    //data: kendo.stringify(submitModel),
+                    data: "beginTime=" + $("#beginTime").val() + "&endTime=" + $("#endTime").val() + "&department=" + $("#department").val(),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'html',
+                    success: function (script) {
+                        //eval(script);
+                        
+                        $("#grid").html($.trim(script));
+                        structure(60, 220, "menu", "slideArea");
+                    },
+                    beforeSend:function() {
+                        loade();
+                    },
+                    complete:function() {
+                        loadeStop();
+                    }
+                });
+
+            },
+            Export: function (e) {
+                if ($("#beginTime").val() == "" || $("#endTime").val() == "") {
+                    app.Notification.warning("请填写日期");
+                    return false;
+                }
+                if ($("#department").val() == "") {
+                    app.Notification.warning("请填写部门");
+                    return false;
+                }
+                e.preventDefault();
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                
+                if (!searchBar.validate()) {
+                    return false;
+                } else {
+                    location.href = "/ReportForm/SaveToExcelX?beginTime=" + $("#beginTime").val() + "&endTime=" + $("#endTime").val() + "&department=" + $("#department").val();
+                }
+                //Save to Server            
+
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+        //页面跳转
+        function JumpDetailPage(e) {
+            e.preventDefault();
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.CallReportId;
+            window.location.href = "/Html/ProjectDetails";
+
+        }
+        $("#searchGrids").kendoGrid({
+            dataSource: {
+                type: "odata",
+                transport: {
+                    read: "http://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders"
+                },
+                schema: {
+                    model: {
+                        fields: {
+                            OrderID: { type: "number" },
+                            ShipCountry: { type: "string" },
+                            ShipCity: { type: "string" },
+                            ShipName: { type: "string" },
+                            OrderDate: { type: "date" },
+                            ShippedDate: { type: "date" }
+                        }
+                    }
+                },
+                pageSize: 15
+            },
+            height: 430,
+            sortable: true,
+            reorderable: true,
+            resizable: true,
+            pageable: true,
+            columns: [
+                {
+                    field: "OrderDate",
+                    title: "Order Date",
+                    width: 110,
+                    format: "{0:MM/dd/yyyy}"
+                },
+                {
+                    field: "ShipCountry",
+                    title: "Ship Country",
+                    width: 110
+                },
+                {
+                    field: "ShipCity",
+                    title: "Ship City",
+                    width: 110
+                },
+                {
+                    field: "ShipName",
+                    title: "Ship Name",
+                    width: 200
+                },
+                {
+                    field: "ShippedDate",
+                    title: "Shipped Date",
+                    format: "{0:MM/dd/yyyy}"
+                },
+                {
+                    field: "OrderID",
+                    title: "ID",
+                    width: 60
+                },
+                {
+                    command: [
+                        {
+                            name: "",
+                            text: "查看详细",
+                            imageClass: "k-icon iconB-search ",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '10%',
+                    attributes: { style: "text-align: center; " }
+                }
+            ]
+        });
+    })
+</script>

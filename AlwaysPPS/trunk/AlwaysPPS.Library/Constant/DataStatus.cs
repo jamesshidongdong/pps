@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AlwaysPPS.Library.Constant
+{
+    public sealed class DataStatus
+    {
+        public const string Active = "A";
+        public const string Deleted = "X";
+        public const string Closed = "C";
+
+        public struct ProjectState
+        {
+            public const string pendingByBuHead = "待审批";
+            public const string pendingByTrafficLeader = "待分配项目";
+            public const string pendingByTeamLeader = "待制定工作计划";
+            //public const string inprocess = "进行中";
+            public const string pendingByTeamLeaderEnd = "进行中";
+
+            public const string closed = "已结案";
+
+            public const string Reject = "已拒绝";
+
+
+            public const string PTA = "PendingTeamLeadAssignment";
+
+            public const string BU = "PendingApproval";
+
+            //表示已经完成
+            public const string C = "C";
+        }
+
+
+        public struct SearchTypes
+        {
+            public const string SerAll = "所有";
+            public const string Tijiao = "提交";
+            public const string utijiao = "未提交";
+        }
+
+        public struct SearchMeum
+        {
+            public const string YT = "2";
+            public const string UT = "1";
+            public const string ALL = "0";
+        }
+
+        public struct DataWeek
+        {
+            public const string M1 = "星期一";
+            public const string M2 = "星期二";
+            public const string M3 = "星期三";
+            public const string M4 = "星期四";
+            public const string M5 = "星期五";
+            public const string M6 = "星期六";
+            public const string M7 = "星期日";
+
+        }
+
+        
+
+    }
+}

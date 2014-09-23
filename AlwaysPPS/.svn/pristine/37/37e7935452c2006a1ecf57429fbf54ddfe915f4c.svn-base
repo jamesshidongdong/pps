@@ -1,0 +1,168 @@
+﻿@*@using AlwaysPPS.Entity;
+
+@model List<VProject>*@
+
+@*<table class="table">
+    <thead>
+        <tr>
+            <th>操作</th> <th>客户</th><th>项目名称</th><th>申请人</th><th>项目完稿/比稿日期</th><th>项目状态</th>
+        </tr>  
+                
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <tr>
+                <td><a href="/Project/ProjectDetail?ProjectId=@Model[i].ProjectId">详情</a>
+                    &nbsp;|&nbsp;
+                    <a href="javascript:Close(@Model[i].ProjectId)">关闭</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m[i].ClientName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m[i].ProjectName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m[i].RequestorName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m[i].Deadline)
+                </td>
+                <td>@Html.DisplayFor(m=>m[i].State)</td>
+            </tr>
+        }
+    </tbody>
+</table>*@
+ <div id="TodoProjectsItem"></div>
+<script>
+    function onDataBounded(e) {
+
+        var grid = $("#TodoProjectsItem").data("kendoGrid");
+
+        for (var i = 0; i < e.sender._data.length; i++) {
+
+            var data = e.sender._data[i];
+            var ddd = data.DeadlineF + " 00:00:00";
+            var dt = new Date(ddd);
+            var now = new Date();
+
+            //var tt= new Date(now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate() + " 00:00:00")
+            var hour = (dt - now) / (1000 * 3600);
+            console.log(data.ProjectId + "\tpro " + i + " " + hour);
+            if (hour < 48) {
+                var rowNumber = i + 1;
+                $("#TodoProjectsItem").find("tr:eq(" + rowNumber + ")").addClass('bgRed');
+            }
+
+
+        }
+    }
+
+    
+    $(function () {
+        function JumpDetailPage(e) {
+            e.preventDefault();
+            
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var state = dataItem.State;
+            var accId = dataItem.ProjectId;
+            if (state == '待审批') {
+
+                window.location = "/Report/ApproveOrReject/" + accId;
+            }
+            if (state == "待分配项目" || state == "待制定工作计划" || state == "进行中" || state == "已结案") {
+                
+                window.location = "/Report/ProjectDetail/" + accId;
+            }
+            
+        }
+
+        function JumpClosePage(e) {
+            e.preventDefault();
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.ProjectId;
+           
+            if (window.confirm("确定关闭？")) {
+                $.ajax({
+                    type: 'Post',
+                    url: "/Project/CloseProject",
+                    data: { ProjectId: accId },
+                    success: function (script) {
+                        eval(script);
+                    }
+                });
+            }
+
+        }
+
+        $("#TodoProjectsItem").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: '@Url.Action("GetTodoProjects", "Index")'}
+            },
+            resizable: false,
+            pageable: false,
+            scrollable: false,
+            columns: [
+                {
+                    command: [
+                        {
+                            name: " ",
+                            text: "详情",
+                            imageClass: "k-icon iconB-search ",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '10%',
+                    attributes: { style: "text-align: center; " }
+                },{
+                    field: "State",
+                    title: "状态",
+                    width: '10%'
+                },
+                {
+                    field: "ClientName",
+                    title: "客户",
+                    width: '10%'
+                },
+                {
+                    field: "ProjectName",
+                    title: "项目名称",
+                    width: '15%',
+                    
+                   
+                },
+                {
+                    field: "RequestorName",
+                    title: "申请人",
+                    width: '15%'
+                },
+                {
+                    field: "DepartmentNames",
+                    title: "部门",
+                    width: '20%'
+                },{
+                    field: "RequestedDateF",
+                    title: "创建时间",
+                    width: '10%'
+                },
+                {
+                    field: "DeadlineF",
+                    title: "项目完稿/比稿日期",
+                    width: '10%'
+                }
+                
+                
+            ], dataBound: function (e) {
+              
+             
+                onDataBounded(e);
+
+            }
+            //editable: true
+        });
+    });
+</script>

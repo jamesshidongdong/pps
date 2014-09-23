@@ -1,0 +1,5 @@
+D:\AlwaysPPS\trunk\AlwaysPPS.Library\bin\Debug\AlwaysPPS.Library.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Library\bin\Debug\AlwaysPPS.Library.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Library\obj\Debug\AlwaysPPS.Library.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Library\obj\Debug\AlwaysPPS.Library.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Library\obj\Debug\AlwaysPPS.Library.csprojResolveAssemblyReference.cache

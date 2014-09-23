@@ -1,0 +1,7 @@
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\obj\Debug\AlwaysPPS.Entity.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\bin\Debug\AlwaysPPS.Entity.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\bin\Debug\AlwaysPPS.Entity.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\bin\Debug\AlwaysFramework.DAL.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\bin\Debug\AlwaysFramework.DAL.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\obj\Debug\AlwaysPPS.Entity.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Entity\obj\Debug\AlwaysPPS.Entity.csprojResolveAssemblyReference.cache

@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Milestone";
+    Layout = null;
+}
+
+<div class="main">
+    <div id="MilestoneGrid"></div>
+</div>
+<script>
+    $(function () {
+        var crudServiceBaseUrl = "http://demos.telerik.com/kendo-ui/service",
+            dataSource = new kendo.data.DataSource({
+                transport: {
+                    read:  {
+                        url: crudServiceBaseUrl + "/Products",
+                        dataType: "jsonp"
+                    },
+                    update: {
+                        url: crudServiceBaseUrl + "/Products/Update",
+                        dataType: "jsonp"
+                    },
+                    destroy: {
+                        url: crudServiceBaseUrl + "/Products/Destroy",
+                        dataType: "jsonp"
+                    },
+                    create: {
+                        url:"/Project/Add",
+                        dataType: "jsonp"
+                    },
+                    parameterMap: function(options, operation) {
+                        if (operation !== "read" && options.models) {
+                            return {models: kendo.stringify(options.models)};
+                        }
+                    }
+                },
+                batch: true,
+                pageSize: 15,
+                schema: {
+                    model: {
+                        id: "ProductID",
+                        fields: {
+                            ProductID: { editable: false, nullable: true },
+                            ProductName: { validation: { required: true } },
+                            UnitPrice: { type: "number", validation: { required: true, min: 1} },
+                            Discontinued: { type: "boolean" },
+                            UnitsInStock: { type: "number", validation: { min: 0, required: true } }
+                        }
+                    }
+                }
+            });
+
+        $("#MilestoneGrid").kendoGrid({
+            dataSource: dataSource,
+            navigatable: true,
+            pageable: true,
+            height: 400,
+            toolbar: ["create", "save", "cancel"], 
+            columns: [
+                "ProductName",
+                { field: "UnitPrice", title: "Unit Price", format: "{0:c}", width: " 30%" },
+                { field: "UnitsInStock", title: "Units In Stock", width: " 30%" },
+                { field: "Discontinued", width: " 30%" },
+                { command: "destroy", title: " ", width: " 10%" }],
+            editable: true
+        });
+    });
+</script>

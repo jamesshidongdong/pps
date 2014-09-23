@@ -1,0 +1,75 @@
+﻿@using Antlr.Runtime.Misc
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="homeBox">
+            <div id="tabstrip">
+                <ul>
+                    <li class="k-state-active">
+                        <div class="homeHead">
+                            <span class="icons-backlog"></span>
+                            待办事宜
+                        </div>
+                    </li>
+                    <li>
+                        <div class="homeHead">
+                            <span class="icons-myTimetable"></span>
+                            我的时间表
+                        </div>
+                    </li>
+                    <li>
+                        <div class="homeHead">
+                            <span class="icons-myProjects"></span>
+                            我的项目
+                        </div>
+                    </li>
+                </ul>
+                <div>
+                    <div class="titleBar">
+                        <h3>待办事宜</h3>
+                    </div>
+                    <div class="main">
+                        @*<div id="trainingItem"></div>*@
+                         @Html.Partial("TodoProjects")
+                        @*@Html.Action("TodoProjects","Html")*@
+                    </div>
+                </div>
+                <div>
+                    <div class="titleBar">
+                        <h3>我的时间表</h3>
+                    </div>
+                    <div class="main">
+                        <p>Sunny weather in New York.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="titleBar">
+                        <h3>我的项目</h3>
+                    </div>
+                    <div class="main">
+                         @*@Html.Action("MyProject","Html")*@
+                        @Html.Partial("MyProject");
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+ <script>
+     $(function () {
+         //Tab
+         $("#tabstrip").kendoTabStrip({
+             animation: {
+                 open: {
+                     effects: "fadeIn"
+                 }
+             }
+         });
+     });
+</script>

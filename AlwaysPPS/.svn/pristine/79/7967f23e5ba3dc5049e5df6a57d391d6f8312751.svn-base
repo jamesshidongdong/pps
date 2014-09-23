@@ -1,0 +1,264 @@
+﻿@{
+    ViewBag.Title = "报表（项目分配）";
+}
+
+
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>报表（项目分配）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>开始时间</label><br />
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate"
+                                       id="beginTime" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>结束时间</label><br />
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate"
+                                       id="endTime" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>部门</label><br />
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: departments,
+    value: department"
+                                       id="department" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-8">
+                                <button id="search" class="btn btn-blueBlack hyponasty" data-bind="click: Submit" type="button"><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="dashboardLoading" style="text-align: center; display: none;">
+                <img src="../../Content/images/w_loader.gif" alt="" />
+            </div>
+
+            <div class="chart">
+                <div class="chartTitle">项目</div>
+                <div id="programPie" class="chartMain" style="width: 960px; padding-right: 35px;"></div>
+            </div>
+            <div class="chart">
+                <div class="chartTitle">实际消耗时间</div>
+                <div id="factPie" class="chartMain" style="width: 960px; padding-right: 35px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+@*@section head {
+    <link href="@Url.Content("~/Content/kendo/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/kendo/2014.1.318/kendo.dataviz.min.js")"></script>*@
+
+<script>
+    $(function () {
+        var dataSource;
+
+
+        $("#search").bind("click", function () {
+            var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+            if (!searchBar.validate()) {
+                return false;
+            }
+            $.ajax({
+                url: "/ReportForm/GetAssign",
+                type: "get",
+                cache: false,
+                async: false,
+                data: { beginTime: $("#beginTime").val(), endTime: $("#endTime").val(), department: $("#department").val() },
+                dataType: "json",
+                success: function (datas) {
+                    
+                    dataSource = new kendo.data.DataSource({
+                        data: datas
+                    });
+                    var total1 = false;
+                    var total2 = false;
+                    $.each(datas, function (i, v) {
+                        if (v.pTime != 0 && v.pTime != undefined) {
+                            total1 = true;
+                        }
+                        if (v.fTime != 0 && v.fTime != undefined) {
+                            total2 = true;
+                        }
+                    });
+                    var dataSource2 = new kendo.data.DataSource({
+                        data: []
+                    });
+                    var chart = $("#programPie").data("kendoChart");
+                    if (total1) {
+                        chart.setDataSource(dataSource);
+                    } else {
+                        chart.setDataSource(dataSource2);
+                    }
+                    var chart2 = $("#factPie").data("kendoChart");
+                    if (total2) {
+                        chart2.setDataSource(dataSource);
+                    } else {
+                        chart2.setDataSource(dataSource2);
+                    }
+                    //var grid = $("#grid").data("kendoGrid");
+                    //grid.setDataSource(dataSource);
+                },
+                beforeSend: function () {
+                    loade();
+                },
+                complete: function () {
+                    loadeStop();
+                }
+            });
+
+        });
+
+
+        $("#beginTimes, #endTimes").kendoDatePicker();
+        var depList;
+        $.ajax({
+            url: "/ReportForm/getDepartment",
+            type: "get",
+            cache: false,
+            async: false,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                depList = data;
+            }
+        });
+        $("#departmentss").kendoDropDownList({
+            dataTextField: "DepartmentName",
+            dataValueField: "DepartmentName",
+            dataSource: depList
+        });
+        $("#searchs").kendoButton({
+            icon: "search"
+        });
+        $("#excels").kendoButton({
+            spriteCssClass: "k-icon"
+        });
+
+        function createChart() {
+            $("#programPie").kendoChart({
+                title: {
+                    text: ""
+                },
+                legend: {
+                    position: "right"
+                },
+                //dataSource: {
+                //    data: dataSource
+                //},
+                series: [
+                    {
+                        type: "pie",
+                        field: "pTime",
+                        categoryField: "proName"
+                        //explodeField: "explode"
+                    }
+                ],
+                seriesDefaults: {
+                    labels: {
+                        visible: true,
+                        background: "transparent",
+                        template: "#= category #: #= value#"
+                    }
+                },
+                seriesColors: ["#42a7ff", "#666666", "#999999", "#cccccc", "#ff0", "#fe0", "#dd0", "#440", "#1362AF", "#FFCB44", "#EC3E35"],
+                tooltip: {
+                    visible: true,
+                    template: "${ category } - ${ value }工时"
+                }
+            });
+        }
+
+
+        function createChart2() {
+            $("#factPie").kendoChart({
+                title: {
+                    text: ""
+                },
+                legend: {
+                    position: "right"
+                },
+                //dataSource: {
+                //    data: dataSource
+                //},
+                series: [
+                    {
+                        type: "pie",
+                        field: "fTime",
+                        categoryField: "proName"
+                        // explodeField: "explode"
+                    }
+                ],
+                seriesDefaults: {
+                    labels: {
+                        visible: true,
+                        background: "transparent",
+                        template: "#= category #: #= value#"
+                    }
+                },
+                seriesColors: ["#42a7ff", "#666666", "#999999", "#cccccc", "#ff0", "#fe0", "#dd0", "#440", "#1362AF", "#FFCB44", "#EC3E35"],
+                tooltip: {
+                    visible: true,
+                    template: "${ category } - ${ value }工时"
+                }
+            });
+        }
+
+        createChart();
+        createChart2();
+        var departmentsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/getDepartment"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            departments: departmentsDataSource,
+
+
+            startDate: "",
+            endingDate: "",
+            department: null
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+        //$(document).bind("kendo:skinChange", createChart);
+    });
+
+
+    //$(document).ready(createChart);
+
+</script>
+
+
+@*}*@

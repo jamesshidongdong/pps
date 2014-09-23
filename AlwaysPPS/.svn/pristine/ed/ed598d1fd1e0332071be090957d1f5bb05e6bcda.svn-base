@@ -1,0 +1,47 @@
+﻿@using AlwaysPPS.Entity
+@{ int num = 0;}
+@if (Model != null)
+{
+
+    <thead>
+        <tr>
+            <th>日期</th>
+
+            @foreach (var i in Model["d1"])
+            {
+                <th>@i</th>
+            }
+            @{ num = ((List<string>)Model["d1"]).Count;}
+        </tr>
+    </thead>
+    <tbody>
+        @{ int index = 0;}
+        @foreach (var i in Model["d2"])
+        {
+            <tr>
+                <td>@DateTime.Parse(i).ToString("yyyy/MM/dd")</td>
+                @foreach (var e in ((List<HumanResources>)Model["d3"]).Skip(index * num).Take(num))
+                {
+                    if (e.totalHours == 6)
+                    {
+                    <td class="yellow">@Html.Raw(e.content)<span class="orangePoint"></span></td>
+                    }
+                    else if (e.totalHours > 6)
+                    {
+                    <td class="green">@Html.Raw(e.content)<span class="greenPoint"></span></td>
+                    }
+                    else if (e.totalHours < 6&&e.totalHours>=0)
+                    {
+                    <td class="red">@Html.Raw(e.content)<span class="redPoint"></span></td>
+                    }
+                    else
+                    {
+                    <td></td>
+                    }
+                   
+                }
+                 @{ index++; }
+            </tr> 
+        }
+    </tbody>
+}

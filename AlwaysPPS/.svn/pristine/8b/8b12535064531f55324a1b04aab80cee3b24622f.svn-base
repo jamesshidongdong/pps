@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AlwaysPPS.Entity.StoredProcedure
+{
+   public  class PlanTimeParameter
+    {
+       public int teamID { get; set; }
+       public DateTime startDate { get; set; }
+       public DateTime endingDate { set; get; }
+    }
+}

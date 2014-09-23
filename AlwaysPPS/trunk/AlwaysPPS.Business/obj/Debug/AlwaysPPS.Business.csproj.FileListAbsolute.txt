@@ -1,0 +1,5 @@
+D:\AlwaysPPS\trunk\AlwaysPPS.Business\bin\Debug\AlwaysPPS.Business.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Business\bin\Debug\AlwaysPPS.Business.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Business\obj\Debug\AlwaysPPS.Business.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Business\obj\Debug\AlwaysPPS.Business.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Business\obj\Debug\AlwaysPPS.Business.csprojResolveAssemblyReference.cache

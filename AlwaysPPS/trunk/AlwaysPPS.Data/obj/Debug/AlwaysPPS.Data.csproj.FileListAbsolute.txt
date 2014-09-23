@@ -1,0 +1,14 @@
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysPPS.Data.dll.config
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysPPS.Data.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysPPS.Data.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysFramework.DAL.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysPPS.Entity.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\EntityFramework.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\EntityFramework.SqlServer.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysPPS.Entity.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\AlwaysFramework.DAL.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\EntityFramework.xml
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\bin\Debug\EntityFramework.SqlServer.xml
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\obj\Debug\AlwaysPPS.Data.csprojResolveAssemblyReference.cache
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\obj\Debug\AlwaysPPS.Data.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.Data\obj\Debug\AlwaysPPS.Data.pdb

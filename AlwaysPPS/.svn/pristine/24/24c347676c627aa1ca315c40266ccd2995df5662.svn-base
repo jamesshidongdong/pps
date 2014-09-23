@@ -1,0 +1,319 @@
+﻿@{
+    ViewBag.Title = "SearchProjects";
+}
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>搜索项目</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="normalInput">项目编号</label><br/>
+                                <input id="ProjectIdID" type="text" class="form-control" style="width:95%;"
+                                       data-role="autocomplete"
+                                       data-auto-bind="false"
+                                       data-bind="source: itemCoding,
+    value: itemCodes" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label>客户</label><br/>
+                                <input type="text" class="form-control"  style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                        data-value-primitive="true"
+                                       data-option-label="客户"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: customers,
+
+    value: customer" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                 <label>状态</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                    data-value-primitive="true"
+                                       data-option-label="状态"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: status,
+    value: statusCode" 
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-blueBlack hyponasty" data-bind="click: Submit" type="button"><i class="icon-ok-sign"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                            <div class="col-md-4 col-md-offset-8">
+                                <button class="btn btn-blueBlack hyponasty" data-bind="click: Submit" type="button"><i class="icon-ok-sign"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>*@
+                    </div>
+                </form>
+            </div>
+            <div id="SearchItem"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function onDataBoundser(e) {
+
+        var grid = $("#SearchItem").data("kendoGrid");
+
+        for (var i = 0; i < e.sender._data.length; i++) {
+
+            var data = e.sender._data[i];
+            if (data.IsChaoShi && data.State != '已结案') {
+                var rowNumber = i + 1;
+                $("#SearchItem").find("tr:eq(" + rowNumber + ")").addClass('bgRed');
+            }
+
+
+        }
+    }
+
+    function JumpDetailPage(e) {
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var state = dataItem.State;
+        var accId = dataItem.ProjectId;
+        if (state == '待审批') {
+
+            window.location = "/Report/ApproveOrReject/" + accId;
+        }
+        if (state == "待分配项目" || state == "待制定工作计划" || state == "进行中" || state == "已结案") {
+
+            window.location = "/Report/ProjectDetail/" + accId;
+        }
+
+    }
+
+    $(function () {
+        
+        var clientsDataSource = new kendo.data.DataSource({ 
+            serverFiltering: true,
+            type: "aspnetmvc-ajax",
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetProjectCodeListByid",
+                    data: function () {
+                        var keyword = $("#ProjectIdID").data("kendoAutoComplete").value();
+                        return { client: keyword };
+                    }
+                }
+            }
+        });
+
+
+        var itemCodingDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetProjectCodeList"
+                }
+            }
+        });
+        var customersDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetClientNameList"
+                }
+            }
+        });
+        var statusDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    //url: "/Search/GetStatusCodeList"//数据状态（这里要根据需求来定）
+                    url: "/Search/GetStateList"//项目状态
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            itemCoding: clientsDataSource,
+            customers: customersDataSource,
+            status: statusDataSource,
+
+
+            itemCodes: null,
+            customer: null,
+            statusCode: null,
+
+            Submit: function(e) {
+                e.preventDefault();
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server   
+                
+                var submitModel = {
+                    itemCodes: this.get("itemCodes"),
+                    customer: this.get("customer"),
+                    statusCode: this.get("statusCode")
+
+                };
+                
+
+                var refreshGridDataSource = new kendo.data.DataSource({
+                    serverFiltering: true,
+                    serverPaging: true,
+                    type: "aspnetmvc-ajax",
+                    transport: {
+                        read: {
+                            url: '@Url.Action("SearchProjects", "Search")',
+                            //data: kendo.stringify(submitModel),
+                            data: function(data) {
+                                return {
+                                    ProjectCode: submitModel.itemCodes,
+                                    ClientName: submitModel.customer,
+                                    State: submitModel.statusCode,
+                                    //Status: submitModel.statusCode,
+                                }
+                            }
+                        },
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total"
+                    },
+                    pageSize: 15,
+
+                });
+                $('#SearchItem').data('kendoGrid').setDataSource(refreshGridDataSource);
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+        function JumpDetailPage(e) {
+            e.preventDefault();
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.ProjectId;
+            window.location.href = "/Project/GetMyProjectDetail/" + accId;
+
+        }
+
+        $("#SearchItem").kendoGrid({
+            dataSource: {
+                serverFiltering: true,
+                serverPaging: true,
+                type: "aspnetmvc-ajax",
+                transport: {
+                    read: {
+                        url: '@Url.Action("SearchProjects", "Search")',
+                        data: function (data) {
+                            return {
+                                PageIndex: data.page,
+                                NumRow: data.pageSize
+                            };
+                        }
+                    },
+                    dataType: "json",
+                    type: "POST"
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                },
+                pageSize: 15
+            },
+            height:600,
+            sortable: false,
+            reorderable: false,
+            resizable: false,
+            pageable: true,
+            editable:false,
+            columns: [
+                {
+                    command: [
+                        {
+                            name: " ",
+                            text: "详情",
+                            imageClass: "k-icon iconB-search ",
+                            className:"textC",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '13%',
+
+                },
+                {
+                    field: "State",
+                    title: "项目状态",
+                    width: '12%'
+                },
+                {
+                    field: "ProjectCode",
+                    title: "项目编号",
+                    width: '10%'
+                },
+                {
+                    field: "ProjectName",
+                    title: "项目名称",
+                    width: '10%'
+                },
+                {
+                    field: "ClientName",
+                    title: "客户",
+                    width: '10%'
+                },
+                {
+                    field: "DeptName",
+                    title: "部门",
+                    width: '5%'
+                },
+                
+                {
+                    field: "DeadlineF",
+                    title: "项目完稿/比稿日期",
+                    width: '10%'
+                },
+               
+                {
+                    field: "RequestorUname",
+                    title: "创建人",
+                    width: '10%'
+                },
+                {
+                    field: "RequestedDateF",
+                    title: "创建时间",
+                    width: '10%'
+                }
+                
+                //{
+                //    field: "StatusF",
+                //    title: "数据状态",
+                //    width: '10%'
+                //}
+            ], dataBound: function (e) {
+                $(".k-grid .textC").parent("td").css("text-align", "center");
+                structure(60, 220, "menu", "slideArea");
+                onDataBoundser(e);
+            }
+        });
+    });
+
+</script>

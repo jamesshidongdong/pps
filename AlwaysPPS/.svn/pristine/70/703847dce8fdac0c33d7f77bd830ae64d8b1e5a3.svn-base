@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "HourExplain";
+}
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>时间表（工时说明）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" style="width:95%"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-option-label="请选择人员"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: personnels,
+    value: personnel" 
+                                    />
+                                
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" style="width:95%"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-option-label="请选择项目名称"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: projectNames,
+    value: projectName" 
+                                    />
+                                
+                            </div>
+                        </div>
+                        <div class="row"> 
+                            <div class="col-md-4">
+                                
+                                <input type="text" class="form-control" style="width:95%"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                
+                                <input type="text" class="form-control" style="width:95%"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate" 
+                                    />
+                            </div>  
+                            <div class="col-md-4" >
+                                <button class="btn btn-blueBlack" data-bind="click: Submit" type="button" style="float:right;margin-right:5%;"><i class="icon-ok-sign"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="hourExplainGrid"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        
+        var personnelsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetClientNameList"
+                }
+            }
+        });
+        var projectNamesDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Search/GetProjectCodeList"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            projectNames: projectNamesDataSource,
+            personnels: personnelsDataSource,
+
+
+            personnel: null,
+            projectName: null,
+            Submit: function (e) {
+
+                e.preventDefault();
+
+
+
+                var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+                if (!searchBar.validate()) {
+                    return false;
+                }
+                //Save to Server            
+                var submitModel = {
+                    projectName: this.get("projectName"),
+                    personnel: this.get("personnel"),
+                    startDate: this.startDate,
+                    endingDate: this.endingDate
+                };
+
+                app.Notification.success("from view");
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/Add",
+                    data: kendo.stringify(submitModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (script) {
+                        //eval(script);
+                    }
+                });
+
+            }
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+
+       
+        
+        
+        
+    })
+</script>

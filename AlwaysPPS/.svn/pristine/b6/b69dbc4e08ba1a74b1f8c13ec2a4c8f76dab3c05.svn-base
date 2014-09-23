@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Folder";
+    Layout = null;
+}
+<div class="main">
+    <div id="folderGrid"></div>
+</div>
+<div id="addArea" style="display:none" class="clearfix">
+    <label style="float: left">上传文件</label>
+    <input name="files" id="files" type="file" style="float: left"/>
+</div>
+<script>
+    $(function () {
+        var crudServiceBaseUrl = "http://demos.telerik.com/kendo-ui/service",
+            dataSource = new kendo.data.DataSource({
+                transport: {
+                    read:  {
+                        url: crudServiceBaseUrl + "/Products",
+                        dataType: "jsonp"
+                    },
+                    update: {
+                        url: crudServiceBaseUrl + "/Products/Update",
+                        dataType: "jsonp"
+                    },
+                    destroy: {
+                        url: crudServiceBaseUrl + "/Products/Destroy",
+                        dataType: "jsonp"
+                    },
+                    create: {
+                        url: crudServiceBaseUrl + "/Products/Create",
+                        dataType: "jsonp"
+                    },
+                    parameterMap: function(options, operation) {
+                        if (operation !== "read" && options.models) {
+                            return {models: kendo.stringify(options.models)};
+                        }
+                    }
+                },
+                batch: true,
+                pageSize: 10,
+                schema: {
+                    model: {
+                        id: "ProductID",
+                        fields: {
+                            ProductName: { validation: { required: true } },
+                            UnitsInStock: { type: "number", validation: { min: 0, required: true } }
+                        }
+                    }
+                }
+            });
+
+        $("#folderGrid").kendoGrid({
+            dataSource: dataSource,
+            pageable: true,
+            height: 330,
+            toolbar: [
+            {
+                text: "添加文件",
+                className: "k-grid-custom addBtn",
+                imageClass: "k-icon k-si-plus"
+            }],
+            columns: [
+                { command: [
+                        {
+                            name: "destroy",
+                            text: "删除",
+                            imageClass: "k-icon k-delete"
+                        }
+                ], width: "10%" },
+                { field:"ProductName", title: "Product Name" },
+                { field: "UnitsInStock", title:"Units In Stock", width: "100px" },
+                { command: [
+                        {
+                        name: " ",
+                        text: "下载",
+                        imageClass: "k-icon iconB-download-alt",
+                        //click: download
+                        }
+                    ],
+                    width: "10%"
+                }
+            ],
+            editable: "popup"
+        });
+        var addArea = $("#addArea");
+        $(".addBtn").bind("click", function () {
+            addArea.data("kendoWindow").open().center();
+        });
+        if (!addArea.data("kendoWindow")) {
+            addArea.kendoWindow({
+                width: "510px",
+                height: "400px",
+                resizable: false,
+                modal: true,
+                title: "添加文件",
+                actions: [
+                    "Close"
+                ]
+            });
+        }
+        $("#files").kendoUpload({
+            async: {
+                saveUrl: "save",
+                removeUrl: "remove",
+                autoUpload: true
+            }
+        });
+    });
+</script>

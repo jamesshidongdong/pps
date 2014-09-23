@@ -1,0 +1,700 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using AlwaysFramework.DAL;
+using AlwaysFramework.DAL.Providers.EntityFramework;
+using AlwaysFramework.MVC;
+using AlwaysFramework.MVC.Extension;
+using AlwaysPPS.Data;
+using AlwaysPPS.Entity;
+using AlwaysPPS.Entity.StoredProcedure;
+using AlwaysPPS.Library;
+using AlwaysPPS.Service;
+using Microsoft.Practices.Unity;
+using System.Data.Linq.SqlClient;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Table;
+using AlwaysPPS.Library.Constant;
+namespace AlwaysPPS.Web.Controllers
+{
+    public class JuryComparer : IEqualityComparer<HumanResources>
+    {
+        public bool Equals(HumanResources x, HumanResources y)
+        {
+            return (x.uid.Equals(y.uid) && x.content.Equals(y.content) && x.dates == y.dates && x.status.Equals(y.status) && x.teamID == y.teamID && x.totalHours.Equals(y.totalHours));
+        }
+        public int GetHashCode(HumanResources obj) { return 0; }
+    }
+    public class JuneComparer : IEqualityComparer<Assign>
+    {
+        public bool Equals(Assign x, Assign y)
+        {
+            return (x.proName.Equals(y.proName) && x.teamID.Equals(y.teamID));
+        }
+        public int GetHashCode(Assign obj) { return 0; }
+    }
+    public class ReportFormController : BaseController
+    {
+
+        //DataContext dbPPS=new AlwaysPPSDataEntryDbContext();
+        private readonly IReportFormService workPlan;
+        private readonly IProjectWorkPlanService iProjectWorkPlanService;
+        private readonly ITResourceTeamService _iTResourceTeamService;
+
+        private readonly ICtTeamService _iCtTeamService;
+
+        private readonly IOaDepartment _IOaDepartment;
+
+        private readonly ISpRPTTeamTimeSheetServer _spRptTeamTimeSheetServer;
+
+        private readonly IOaEmployeeService _employeeService;
+
+        private readonly ICtProjectTypeService _ICtProjectTypeService;
+
+        private readonly ISpRPTByTeamTimeSheetServer _rptByTeam;
+
+        private readonly ISpRPTGetTimeSheetByTeamServer _byTeamTimeSheetServer;
+
+        //constructor
+        public ReportFormController(
+                 [Dependency(UnityIOC.UOF.AlwaysPPS)]IUnitOfWork unitOfWork
+            , IReportFormService _test
+            , IProjectWorkPlanService _IProjectWorkPlanService
+            ,  ITResourceTeamService iTResourceTeamService
+            , ICtTeamService _iCtTeamService
+            , IOaDepartment _IOaDepartment
+            , ISpRPTTeamTimeSheetServer _spRptTeamTimeSheetServer
+            , IOaEmployeeService _employeeService
+            , ICtProjectTypeService _ICtProjectTypeService
+            , ISpRPTByTeamTimeSheetServer _rptByTeam
+            , ISpRPTGetTimeSheetByTeamServer _byTeamTimeSheetServer
+            )
+            : base(unitOfWork)
+        {
+            this.workPlan = _test;
+            this.iProjectWorkPlanService = _IProjectWorkPlanService;
+              _iTResourceTeamService = iTResourceTeamService;
+            this._iCtTeamService = _iCtTeamService;
+            this._IOaDepartment = _IOaDepartment;
+
+            this._spRptTeamTimeSheetServer = _spRptTeamTimeSheetServer;
+            this._employeeService = _employeeService;
+            this._ICtProjectTypeService = _ICtProjectTypeService;
+            this._rptByTeam = _rptByTeam;
+            this._byTeamTimeSheetServer = _byTeamTimeSheetServer;
+        }
+
+        //
+        // GET: /ReportForm/
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult hrTable()
+        {
+            BindViewBagUser();
+            return View();
+        }
+        public ActionResult getDepartment()
+        {
+            var depID = workPlan.getDepID(GetCureentID());
+            var list = workPlan.GetDep().Where(u => u.DepartmentId == depID).ToList();
+            var zx = new List<department>();
+            foreach (var i in list)
+            {
+                department d = new department();
+                d.Text = i.DepartmentName;
+                d.Value = i.DepartmentId.ToString();
+                zx.Add(d);
+            }
+            return Json(zx, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult GetBuheadDepart()
+        {
+           var res=  _IOaDepartment.GetList();
+            if(res.Any())
+            {
+              var result=  res.Select(u => new SelectListItem() {Text = u.DepartmentName, Value = u.DepartmentId.ToString()});
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            return null;
+        }
+
+        public ActionResult getTeam(string beginTime, string endTime, string department)
+        {
+            if (beginTime == "" || endTime == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写日期！");
+                return null;
+            }
+            if (department == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写部门！");
+                return null;
+            }
+            try
+            {
+                var begin = DateTime.Parse(beginTime);
+                var end = DateTime.Parse(endTime);
+            }
+            catch (Exception e)
+            {
+                this.ShowNotification(NotificationType.Error, "请填写正确日期！");
+                return null;
+            }
+
+            var teamIDList = workPlan.getTeamID(GetCureentID());
+            IDictionary<string, object> Dic = new Dictionary<string, object>();
+            SpRPTByTeamParameter sq = new SpRPTByTeamParameter(){FromDate =beginTime,ToDate=endTime,UserDeptId=Convert.ToInt32(department) };
+
+           var zx = _rptByTeam.GetList(sq);
+           //= workPlan.GetTeams().Where(u => teamIDList.Contains(u.teamID)).Where(u => u.status == DataStatus.ProjectState.pendingByTeamLeaderEnd || u.status == DataStatus.ProjectState.closed).OrderBy(u=>u.leadID).ToList();
+            var group1 = (from u in zx
+                          orderby u.lead
+                          group u by new { u.lead }
+                              into g
+                              select new { c = g.Key, d = g.Count() })
+                .ToList();
+            var group2 = (from u in zx 
+                          orderby u.lead
+                          group u by new { u.lead, u.name }
+                              into g
+                              select new { d = g.Count() })
+                .ToList();
+            Dic.Add("d1", group1);
+            Dic.Add("d2", group2);
+
+            // if (beginTime == "") { beginTime = new DateTime(1900, 1, 1).ToString(); }
+            //if (endTime == "") { endTime = new DateTime(2900, 1, 1).ToString(); }
+            var list = zx.Distinct().OrderBy(ct => ct.lead).ToList();//endTime大于ct.EndTime(页面大于数据库)
+            Dic.Add("d3", list);
+            if (list.Count == 0)
+            {
+                this.ShowNotification(NotificationType.Information, "没有信息！");
+                return null;
+            }
+            return Json(Dic, JsonRequestBehavior.AllowGet);
+            return View(Dic);
+            //return PartialView("tmTable", Dic);
+        }
+        public ActionResult GetAssign(string beginTime, string endTime, string department)
+        {
+            if (beginTime == "" || endTime == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写日期！");
+                return null;
+            }
+            if (department == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写部门！");
+                return null;
+            }
+            try
+            {
+                var begin = DateTime.Parse(beginTime);
+                var end = DateTime.Parse(endTime);
+            }
+            catch (Exception e)
+            {
+                this.ShowNotification(NotificationType.Error, "请填写正确日期！");
+                return null;
+            }
+            GetTimeSheetParameter gt = new GetTimeSheetParameter() { BeginTime = Convert.ToDateTime(Convert.ToDateTime(beginTime).ToString("yyyy-MM-dd")), EndTime = Convert.ToDateTime(Convert.ToDateTime(endTime).ToString("yyyy-MM-dd")), Dpartment = Convert.ToInt32(department) };
+            var res=  _byTeamTimeSheetServer.GetList(gt);
+
+            //TODO:这是测试的
+            return Json(res, JsonRequestBehavior.AllowGet);
+            
+        }
+
+        /// <summary>
+        /// Get Current User's department Traffic Leader ID
+        /// </summary>
+        /// <returns>-1: Traffic Leader Id not found, else: returns Traffic Leader Id</returns>
+        private int CurrentUserDepartmentTrafficeLeaderId()
+        {
+            var userID = -1;
+
+            var oa = _employeeService.GetByUid(User.UserId);
+            if (oa != null)
+            {
+                var res = _IOaDepartment.GetByDepartmentID(oa.DepartmentId.Value);
+                if (res != null)
+                {
+                    //是Buheader
+                    if (res.DepartmentHeadUid == User.UserId)
+                    {
+
+                        var team = _ICtProjectTypeService.GetByDept(res.DepartmentId);
+                        if (team != null)
+                        {
+                            var resteam = _iTResourceTeamService.GetTraffice(team.TeamId.Value);
+                            if (resteam != null)
+                            {
+                                userID = resteam.ResourceUid; //traffic leader's ID
+                            }
+                        }
+
+                    }
+                }
+            }
+            return userID;
+        }
+
+        [HttpGet]
+        public ActionResult getHumanResource(string beginTime, string endTime, string department, string selTeam, string buildDepart)
+        {
+            
+            if (beginTime == "" || endTime == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写日期！");
+                return null;
+            }
+            if (department == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写部门！");
+                return null;
+            }
+
+            try
+            {
+                var begin = DateTime.Parse(beginTime);
+                var end = DateTime.Parse(endTime);
+            }
+            catch (Exception e)
+            {
+                this.ShowNotification(NotificationType.Error, "请填写正确日期！");
+                return null;
+            }
+
+            int userids = -1;
+            var ints = CurrentUserDepartmentTrafficeLeaderId();
+            if (ints == -1)
+            {
+                userids = User.UserId;
+            }
+            else
+            {
+                userids = ints;
+            }
+
+
+            var teamIDList = workPlan.getTeamID(userids);
+            IDictionary<string, object> Dic = new Dictionary<string, object>();
+
+             Dictionary<int,string> columns=new Dictionary<int, string>();
+             if(string.IsNullOrEmpty(selTeam))
+             {
+                 columns = _iTResourceTeamService.GetSubTeamresource(userids);
+             }
+             else
+             {
+                 columns = _iTResourceTeamService.GetUserInts(Convert.ToInt32(selTeam));
+             }
+            List<string> dates = workPlan.GetDates(beginTime, endTime);
+            Dic.Add("d1", columns);
+
+
+
+            SpRPTParameter parameter = new SpRPTParameter() { FromDate = beginTime, ToDate = endTime, UserDeptId = Convert.ToInt32(department), SubTeamId = (selTeam == "" ? null : selTeam), ProjectRequestorDeptId = (buildDepart == "" ? null : buildDepart) };
+           var resRPT= _spRptTeamTimeSheetServer.GetRPPTList(parameter).ToList();
+            ViewBag.pros = resRPT;
+
+            if (beginTime == "") { beginTime = new DateTime(1900, 1, 1).ToString(); }
+            if (endTime == "") { endTime = new DateTime(2900, 1, 1).ToString(); }
+          
+            dates = dates.Where(ct => DateTime.Parse(beginTime) <= DateTime.Parse(ct) & SqlMethods.DateDiffMinute(DateTime.Parse(endTime), DateTime.Parse(ct)) <= 0).ToList();
+            Dic.Add("d2", dates);
+            Dic.Add("d3", resRPT.Distinct());
+            BindViewBagUser();
+           
+            return PartialView("hrTable", Dic);
+
+        }
+
+        public ActionResult notification(string beginTime, string endTime, string department)
+        {
+            if (beginTime == "" || endTime == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写日期！");
+                return null;
+            }
+            if (department == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写部门！");
+                return null;
+            }
+            try
+            {
+                var begin = DateTime.Parse(beginTime);
+                var end = DateTime.Parse(endTime);
+            }
+            catch (Exception e)
+            {
+                this.ShowNotification(NotificationType.Error, "请填写正确日期！");
+                return null;
+            }
+            return null;
+        }
+        public ActionResult HumanResource()
+        {
+            if(GetRole().Contains(1))
+            {
+                ViewBag.Istraffic = SystemRoles.TraiiceLeader;
+            }
+
+
+            int userids = -1;
+            var ints = CurrentUserDepartmentTrafficeLeaderId();
+            if (ints == -1)
+            {
+                userids = User.UserId;
+            }
+            else
+            {
+                userids = ints;
+            }
+            var model = _employeeService.GetByUid(userids);
+            if(model!=null)
+            {
+                ViewBag.depts = model.DepartmentId;
+            }
+            BindViewBagUser();
+            return View();
+        }
+
+
+
+        /// <summary>
+        /// 获取权限
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetRole()
+        {
+            List<int> res = new List<int>();
+            int userids = -1;
+            var ints = CurrentUserDepartmentTrafficeLeaderId();
+            if (ints == -1)
+            {
+                userids = User.UserId;
+            }
+            else
+            {
+                userids = ints;
+            }
+            var resList = _iTResourceTeamService.GetByUid(userids);
+            if (resList != null)
+            {
+
+                if (resList.Any())
+                {
+                    return resList.Select(u => u.RoleId).ToList();
+
+                }
+            }
+
+         
+            return res;
+        }
+
+        public ActionResult Team()
+        {
+            BindViewBagUser();
+
+            int userids = -1;
+            var ints = CurrentUserDepartmentTrafficeLeaderId();
+            if (ints == -1)
+            {
+                userids = User.UserId;
+            }
+            else
+            {
+                userids = ints;
+            }
+            var model = _employeeService.GetByUid(userids);
+            if (model != null)
+            {
+                ViewBag.depts = model.DepartmentId;
+            }
+            return View();
+        }
+        public ActionResult Assign()
+        {
+            BindViewBagUser();
+            int userids = -1;
+            var ints = CurrentUserDepartmentTrafficeLeaderId();
+            if (ints == -1)
+            {
+                userids = User.UserId;
+            }
+            else
+            {
+                userids = ints;
+            }
+            var model = _employeeService.GetByUid(userids);
+            if (model != null)
+            {
+                ViewBag.depts = model.DepartmentId;
+            }
+            return View();
+        }
+
+        public ActionResult ChartReport()
+        {
+            BindViewBagUser();
+            return View();
+        }
+        #region 保存数据列表到Excel（泛型）+void SaveToExcel<T>(IEnumerable<T> data, string FileName, string OpenPassword = "")
+        /// <summary>
+        /// 保存数据列表到Excel（泛型）
+        /// </summary>
+        /// <typeparam name="T">集合数据类型</typeparam>
+        /// <param name="data">数据列表</param>
+        /// <param name="FileName">Excel文件</param>
+        /// <param name="OpenPassword">Excel打开密码</param>
+        public void SaveToExcel2<T>(IEnumerable<T> data, string FileName, string OpenPassword = "")
+        {
+            FileInfo file = new FileInfo(FileName);
+            try
+            {
+                using (ExcelPackage ep = new ExcelPackage(file, OpenPassword))
+                {
+                    ExcelWorksheet ws = ep.Workbook.Worksheets.Add(typeof(T).Name);
+                    ws.Cells["A1"].LoadFromCollection(data, true, TableStyles.Medium10);
+
+                    ep.Save(OpenPassword);
+                }
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        #endregion
+
+
+
+        /// <summary>
+        ///  get currentuserid if buheader get treaffic id  else cureent id
+        /// </summary>
+        /// <returns></returns>
+        private int GetCureentID()
+        {
+            int userids = -1;
+            var ints = CurrentUserDepartmentTrafficeLeaderId();
+            if (ints == -1)
+            {
+                userids = User.UserId;
+            }
+            else
+            {
+                userids = ints;
+            }
+            return userids;
+
+        }
+
+        public void SaveToExcel(string beginTime, string endTime, string department)
+        {
+            
+            //引入EPPlus的命名空间
+            //using OfficeOpenXml;
+            notification(beginTime, endTime, department);
+            ExcelPackage excel = new ExcelPackage();
+            ExcelWorksheet sheet = excel.Workbook.Worksheets.Add("sheet1");
+
+
+
+            var teamIDList = workPlan.getTeamID(GetCureentID());
+
+            SpRPTByTeamParameter sq = new SpRPTByTeamParameter() { FromDate = beginTime, ToDate = endTime, UserDeptId = Convert.ToInt32(department) };
+
+            var zx = _rptByTeam.GetList(sq);
+            //var zx = workPlan.GetTeams().Where(u => teamIDList.Contains(u.teamID)).Where(u => u.status == DataStatus.ProjectState.pendingByTeamLeaderEnd || u.status == DataStatus.ProjectState.closed).OrderBy(u=>u.leadID).ToList();
+            var list = new List<team>();
+            sheet.Cells.Style.ShrinkToFit = true;
+            sheet.Cells[1, 1].Value = "领导";
+            sheet.Cells[1, 2].Value = "设计师";
+            sheet.Cells[1, 3].Value = "项目";
+            for (int i = 2; i <= list.Count + 1; i++)
+            {
+
+                sheet.Cells[i, 1].Value = list.ElementAtOrDefault(i - 2).lead;
+                sheet.Cells[i, 2].Value = list.ElementAtOrDefault(i - 2).name;
+                sheet.Cells[i, 3].Value = list.ElementAtOrDefault(i - 2).proName;
+
+            }
+            var group1 = list.GroupBy(u => u.leadID).Select(u => u.Count()).ToList();
+            var index1 = 2;
+            foreach (var team in group1)
+            {
+
+                sheet.Cells[index1, 1, index1 + team - 1, 1].Merge = true;
+                sheet.Cells[index1, 1, index1 + team - 1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[index1, 1, index1 + team - 1, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                sheet.Cells[index1, 1, index1 + team - 1, 1].Value = sheet.Cells[index1, 1].Value;
+                index1 += team;
+
+            }
+            var group2 = list.GroupBy(u => u.uid).Select(u => u.Count()).ToList();
+            var index2 = 2;
+            foreach (var team in group2)
+            {
+
+                sheet.Cells[index2, 2, index2 + team - 1, 2].Merge = true;
+                sheet.Cells[index2, 2, index2 + team - 1, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[index2, 2, index2 + team - 1, 2].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                sheet.Cells[index2, 2, index2 + team - 1, 2].Value = sheet.Cells[index2, 2].Value;
+                index2 += team;
+
+            }
+            MemoryStream ms = new MemoryStream();
+            excel.SaveAs(ms);
+
+            //asp.net输出的Excel文件名  
+            //如果文件名是中文的话，需要进行编码转换，否则浏览器看到的下载文件是乱码。  
+            string fileName = HttpUtility.UrlEncode("Excel.xlsx");
+
+            Response.ContentType = "application/vnd.ms-excel";
+            //Response.ContentType = "application/download"; //也可以设置成download  
+            Response.AddHeader("Content-Disposition", string.Format("attachment;filename={0}", fileName));
+
+            Response.Buffer = true;
+            Response.Clear();
+            Response.BinaryWrite(ms.GetBuffer());
+            Response.End();
+        }
+        public void SaveToExcelX(string beginTime, string endTime, string department, string selTeam, string buildDepart)
+        {
+
+
+
+
+            if (beginTime == "" || endTime == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写日期！");
+                return ;
+            }
+            if (department == "")
+            {
+                this.ShowNotification(NotificationType.Error, "请填写部门！");
+                return ;
+            }
+
+            try
+            {
+                var begin = DateTime.Parse(beginTime);
+                var end = DateTime.Parse(endTime);
+            }
+            catch (Exception e)
+            {
+                this.ShowNotification(NotificationType.Error, "请填写正确日期！");
+                return ;
+            }
+            var teamIDList = workPlan.getTeamID(GetCureentID());
+            IDictionary<string, object> Dic = new Dictionary<string, object>();
+
+            Dictionary<int, string> columns = new Dictionary<int, string>();
+            if (string.IsNullOrEmpty(selTeam))
+            {
+                columns = _iTResourceTeamService.GetSubTeamresource(GetCureentID());
+            }
+            else
+            {
+                columns = _iTResourceTeamService.GetUserInts(Convert.ToInt32(selTeam));
+            }
+            List<string> dates = workPlan.GetDates(beginTime, endTime);
+            SpRPTParameter parameter = new SpRPTParameter() { FromDate = beginTime, ToDate = endTime, UserDeptId = Convert.ToInt32(department), SubTeamId = (selTeam == "" ? null : selTeam), ProjectRequestorDeptId = (buildDepart == "" ? null : buildDepart) };
+            var resRPT = _spRptTeamTimeSheetServer.GetRPPTList(parameter).ToList();
+            ViewBag.pros = resRPT;
+            if (beginTime == "") { beginTime = new DateTime(1900, 1, 1).ToString(); }
+            if (endTime == "") { endTime = new DateTime(2900, 1, 1).ToString(); }
+            dates = dates.Where(ct => DateTime.Parse(beginTime) <= DateTime.Parse(ct) & SqlMethods.DateDiffMinute(DateTime.Parse(endTime), DateTime.Parse(ct)) <= 0).ToList();
+            Dic.Add("d2", dates);
+            Dic.Add("d3", resRPT.Distinct());
+            BindViewBagUser();
+            ExcelPackage excel = new ExcelPackage();
+            ExcelWorksheet sheet = excel.Workbook.Worksheets.Add("sheet1");
+            //sheet.Cells.Style.ShrinkToFit = true;
+            sheet.Cells[1, 1].Value = "日期";
+           
+            for (int x = 2; x <= columns.Count + 1; x++)
+            {
+                sheet.Cells[1, x].Value = columns.ElementAtOrDefault(x - 2).Value;
+
+            }
+            for (int i = 2; i <= dates.Count+1; i++)
+            {
+
+                sheet.Cells[i, 1].Value = Convert.ToDateTime(dates[i - 2]).ToString("yyyy-MM-dd");
+
+                for (int x = 2; x <= columns.Keys.Count + 1; x++)
+                {
+
+
+                    var tempData = resRPT.Where(d => d.uid == columns.ElementAtOrDefault(x-2).Key && d.dates.ToString("yyyy-MM-dd") == Convert.ToDateTime(dates[i-2]).ToString("yyyy-MM-dd"));
+                    if (tempData.Any()==false)
+                    {
+                   
+                        sheet.Cells[i, x].Value = "";
+
+                       
+                    }
+                    else
+                    {
+                        var res = "";
+                        foreach (var h in tempData)
+                        {
+                          res=res+  h.content + "        ";
+                        }
+                        sheet.Cells[i, x].Value = res;
+                    }
+                   
+                }
+            }
+            MemoryStream ms = new MemoryStream();
+            excel.SaveAs(ms);
+
+            //asp.net输出的Excel文件名  
+            //如果文件名是中文的话，需要进行编码转换，否则浏览器看到的下载文件是乱码。  
+            string fileName = HttpUtility.UrlEncode("ExcelX.xlsx");
+
+            Response.ContentType = "application/vnd.ms-excel";
+            //Response.ContentType = "application/download"; //也可以设置成download  
+            Response.AddHeader("Content-Disposition", string.Format("attachment;filename={0}", fileName));
+
+            Response.Buffer = true;
+            Response.Clear();
+            Response.BinaryWrite(ms.GetBuffer());
+            Response.End();
+        }
+
+
+        public ActionResult GetTeams()
+        {
+            List<int> teamIDs = _iTResourceTeamService.GetSubTeamID(GetCureentID());
+            List<CtTeam> res=new List<CtTeam>();
+            foreach (var teamID in teamIDs)
+            {
+                if (teamID == null || teamID <= default(int)) {continue;}
+                
+                res.Add(_iCtTeamService.GetListByTeamID(teamID));
+            }
+           if(res.Any())
+           {
+             var jsonRes=  res.Select(u => new SelectListItem() {Text = u.TeamName, Value = u.TeamId.ToString()}).ToList();
+               return Json(jsonRes, JsonRequestBehavior.AllowGet);
+           }
+            return null;
+        }
+
+    }
+}

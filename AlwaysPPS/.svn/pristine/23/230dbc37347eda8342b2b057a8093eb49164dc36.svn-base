@@ -1,0 +1,162 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using AlwaysFramework.DAL;
+using AlwaysFramework.MVC;
+using AlwaysFramework.MVC.Extension;
+using AlwaysPPS.Entity.StoredProcedure;
+using AlwaysPPS.Library;
+using AlwaysPPS.Service;
+using Kendo.Mvc.UI;
+using Microsoft.Practices.Unity;
+
+namespace AlwaysPPS.Web.Controllers
+{
+    public class SearchController : BaseController
+    {
+        //
+        // GET: /Search/
+
+           private readonly IProjectService _projectService;
+        private readonly OaDepartmentService oaDepartmentService;
+        public SearchController([Dependency(UnityIOC.UOF.AlwaysPPS)]IUnitOfWork unitOfWork, IProjectService projectService, OaDepartmentService _oaDepartmentService)
+            : base(unitOfWork)
+        {
+            _projectService = projectService;
+            oaDepartmentService = _oaDepartmentService;
+        }
+
+        public ActionResult SearchProjects()
+        {
+            BindViewBagUser();
+            return View();
+        }
+        [HttpPost]
+        public ActionResult SearchProjects(SearchParameter parameter)
+        {
+            try
+            {
+                int PageIndex = parameter.PageIndex.HasValue ? parameter.PageIndex.Value : 1;
+                int RowSize = parameter.NumRow.HasValue ? parameter.NumRow.Value : 15;
+                parameter.PageIndex = PageIndex;
+                parameter.NumRow = RowSize;
+
+                parameter.userId = User.UserId;
+                var model = _projectService.SearchProjects(parameter);
+                if (model.Count == 0)
+                {
+                    this.ShowNotification(NotificationType.Error, "无数据");
+                }
+                //return Json(model);
+                DataSourceResult data = new DataSourceResult();
+                //data.AggregateResults = null;//
+                //data.Errors = "";//
+                foreach (var item in model)
+                {
+                    var res = oaDepartmentService.GetByDepartmentID(item.DepartmentId);
+                    if(res!=null)
+                    {
+                        item.DeptName = res.DepartmentName;
+                    }
+                }
+                data.Data = model;
+                data.Total = model.Count != 0 ? model[0].TotalCount : 0;
+
+                return Json(data);
+
+            }
+            catch (Exception ex)
+            {
+                this.ShowNotification(NotificationType.Error, ex.Message);
+                return Json(null);
+            }
+        }
+
+        #region 下拉列表
+
+        public ActionResult GetProjectCodeList()
+        {
+            var model = _projectService.GetProjectCodeAll();
+
+            List<SelectListItem> Items = new List<SelectListItem>();
+            foreach(var e in model)
+            {
+                Items.Add(new SelectListItem()
+                {
+                    Text = e,Value=e
+                });
+            }
+
+            return Json(Items,JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult GetProjectCodeListByid(string name)
+        {
+            string nametmp = Request.Params["client"];
+            var model = _projectService.GetProjectCodeAllByID(nametmp).Distinct().ToList();
+
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult GetClientNameList()
+        {
+            var model = _projectService.GetClientNameAll();
+
+            List<SelectListItem> Items = new List<SelectListItem>();
+            foreach(var e in model)
+            {
+                Items.Add(new SelectListItem()
+                {
+                    Text = e,Value = e
+                });
+            }
+
+            return Json(Items, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetStatusCodeList()
+        {
+            var model = _projectService.GetStatusAll();
+
+            List<SelectListItem> Items = new List<SelectListItem>();
+            foreach(var e in model)
+            {
+                Items.Add(new SelectListItem()
+                {
+                    Text = con(e),
+                    Value = e
+                });
+            }
+
+            return Json(Items, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult GetStateList()
+        {
+            var model = _projectService.GetStateAll();
+
+            List<SelectListItem> Items = new List<SelectListItem>();
+            foreach (var e in model)
+            {
+                Items.Add(new SelectListItem()
+                {
+                    Text = e,Value = e
+                });
+            }
+
+            return Json(Items, JsonRequestBehavior.AllowGet);
+        }
+
+        private string con(string val)
+        {
+            if (val == "A") return "正常";
+            else if (val == "C") return "已关闭";
+            else return "已删除";
+        }
+        #endregion
+
+
+
+    }
+}

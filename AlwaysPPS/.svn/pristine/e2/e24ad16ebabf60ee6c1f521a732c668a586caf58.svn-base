@@ -1,0 +1,75 @@
+﻿ <div id="MyProjectsItem"></div>
+<script>
+    
+
+    function JumpDetailPage(e) {
+        alert(0);
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var accId = dataItem.ProjectId;
+        window.location.href = "/Project/GetMyProjectDetail?ProjectId=" + accId;
+
+    }
+    $(function () {
+    
+
+        $("#MyProjectsItem").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: '@Url.Action("GetMyProject", "Project")'}
+            },
+            //height:800,
+            //sortable: true,
+            //reorderable: true,
+            resizable: true,
+            pageable: false,
+            columns: [
+                {
+                    command: [
+                        {
+                            name: "",
+                            text: "查看详细",
+                            imageClass: "k-icon iconB-search ",
+                            click: JumpDetailPage
+                        }
+                    ],
+                    width: '20%',
+
+                },
+                {
+                    field: "ClientName",
+                    title: "客户",
+                    width: '40%'
+                },
+                {
+                    field: "ProjectName",
+                    title: "项目名称",
+                    width: '40%'
+                },
+                {
+                    field: "RequestorName",
+                    title: "申请人",
+                    width: '30%'
+                },
+                {
+                    field: "AssignedToName",
+                    title: "负责人",
+                    width: '30%'
+                },
+                {
+                    field: "DeadlineF",
+                    title: "项目完稿/比稿日期",
+                    width: '30%'
+                },
+                {
+                    field: "StatusF",
+                    title: "状态",
+                    width: '20%'
+                }
+            ]
+            //editable: true
+        });
+    });
+</script>

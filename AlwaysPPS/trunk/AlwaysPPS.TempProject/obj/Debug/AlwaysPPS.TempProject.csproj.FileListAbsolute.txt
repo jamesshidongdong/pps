@@ -1,0 +1,16 @@
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.TempProject.exe.config
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.TempProject.exe
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.TempProject.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.Data.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\EntityFramework.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\EntityFramework.SqlServer.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysFramework.DAL.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.Entity.dll
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.Data.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\EntityFramework.xml
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\EntityFramework.SqlServer.xml
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysFramework.DAL.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\bin\Debug\AlwaysPPS.Entity.pdb
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\obj\Debug\AlwaysPPS.TempProject.csprojResolveAssemblyReference.cache
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\obj\Debug\AlwaysPPS.TempProject.exe
+D:\AlwaysPPS\trunk\AlwaysPPS.TempProject\obj\Debug\AlwaysPPS.TempProject.pdb

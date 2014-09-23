@@ -1,0 +1,309 @@
+﻿@{
+    ViewBag.Title = "报表（依团队）";
+}
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>报表（依团队）</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="main">
+            <div id="searchBar" class="searchBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label> 开始时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: startDate" 
+                                       id="beginTime"
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 结束时间</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="datepicker"
+                                       data-auto-bind="false"
+                                       data-bind="value: endingDate" 
+                                       id="endTime" 
+                                    />
+                            </div>
+                            <div class="col-md-4">
+                                <label> 部门</label><br/>
+                                <input type="text" class="form-control" style="width:95%;"
+                                       data-role="dropdownlist"
+                                       data-auto-bind="false"
+                                       data-value-primitive="true"
+                                       data-option-label="请选择部门"
+                                       data-text-field="Text"
+                                       data-value-field="Value"
+                                       data-bind="source: departments,
+    value: department"                  
+                                        
+                                       id="department"
+                                    />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-8">
+                                
+                                <button class="btn btn-blueBlack hyponasty"  id="excels"  data-bind="click: Export" type="button" ><i class="icon-list-alt"></i>&nbsp;&nbsp;导出</button>
+                            <button class="btn btn-blueBlack hyponasty" id="searchs" data-bind="click: Submit" type="button" ><i class="icon-search"></i>&nbsp;&nbsp;搜索</button>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="dashboardLoading" style="text-align: center; display: none;">
+                <img src="../../Content/images/loader.gif" alt="" />
+            </div>
+            <div id="searchGrid">
+                <table id="grid" class="table-bordered table hrSummaryTable">
+                 <thead>
+                                <tr>
+                                    <th data-field="领导">领导
+                                    </th>
+                                    <th data-field="设计师">设计师
+                                    </th>
+                                    <th data-field="项目">项目
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>                    
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="template" type="text/x-kendo-template">
+    
+        <tr data-uid="#= uid #">
+                    <td>
+                        #: lead #
+                    </td>
+                    <td>
+                        #: name #
+                    </td>
+                    <td>
+                        #: proName #
+                    </td>
+                   
+                </tr>
+</script>
+<script>
+    $(function () {
+        $("#beginTimes,#endTimes").kendoDatePicker();
+        var depList;
+        $.ajax({
+            url: "/ReportForm/getDepartment",
+            type: "get",
+            cache: false,
+            async: false,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                depList = data;
+            }
+        });
+        $("#departmentss").kendoDropDownList({
+            dataTextField: "DepartmentName",
+            dataValueField: "DepartmentName",
+            dataSource: depList
+        });
+        $("#search").kendoButton({
+            icon: "search"
+        });
+        $("#excel").kendoButton({
+            spriteCssClass: "k-icon"
+        });
+        var dataes;
+       
+        $("#searchs").bind("click", function () {
+            
+            var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+            if (!searchBar.validate()) {
+                return false;
+            }
+                $.ajax({
+                    url: "/ReportForm/getTeam",
+                    type: "get",
+                    cache: false,
+                    async: false,
+                    data: { beginTime: $("#beginTime").val(), endTime: $("#endTime").val(), department: $("#department").val() },
+                    dataType: "json",
+                    success: function (datas) {
+                       
+                        var array = new Array();
+                        var array1 = new Array();
+                        var array2 = new Array();
+                        $.each(datas.d3, function (i, v) {
+                            array.push(v.lead);
+                            array1.push(v.name);
+                            array2.push(v.proName);
+                        });
+                        var length = array.length;
+                        var array3 = new Array();
+                        $.each(datas.d1, function (i, v) {
+                            array3.push(v.d);
+                        });
+                        var array4 = new Array();
+                        $.each(datas.d2, function (i, v) {
+                            array4.push(v.d);
+                        });
+
+                        var str = "";
+                        
+                        var rowspanz = 0;
+                        var num = 0;
+                        var global = 0;
+                        if (array2.length != 0) {
+                            $.each(array3, function (i, v) {
+
+                                str += "<tr>";
+                                var rowspan = parseInt(v);
+                                rowspanz += rowspan;
+                                str += "<td class='leader' rowspan=" + rowspan + ">" + array[num] + "</td>";
+                                var rowspanx = 0;
+
+                                $.each(array4.slice(global), function (ii, vv) {
+                                    var rowspan2 = parseInt(vv);
+                                    rowspanx += rowspan2;
+
+                                    if (ii == 0) {
+                                        str += "<td class='stylist' rowspan=" + rowspan2 + ">" + array1[num] + "</td>";
+                                    } else if ((rowspan - rowspanx) >= 0) {
+                                        str += "<tr>";
+                                        str += "<td class='stylist' rowspan=" + rowspan2 + ">" + array1[num] + "</td>";
+                                    } else {
+                                        return;
+                                    }
+                                    for (var d = 0; d < rowspan2; d++) {
+
+                                        if (d == 0) {
+                                            str += "<td>" + array2[num] + "</td>";
+                                        } else {
+                                            str += "<tr>";
+                                            str += "<td>" + array2[num] + "</td>";
+                                        }
+
+                                        str += "</tr>";
+                                        num++;
+                                    }
+                                    global++;
+                                    //str += "</tr>";
+                                });
+                                //str += "</tr>";
+                            });
+                        }
+                        $("#grid tbody").html(str);
+                    },
+                    beforeSend: function () {
+                        loade();
+                    },
+                    complete: function () {
+                        loadeStop();
+                    }
+                });
+            
+        });
+        $("#excels").bind("click", function () {
+            if ($("#beginTime").val() == "" || $("#endTime").val() == "") {
+                app.Notification.warning("请填写日期");
+                return false;
+            }
+            if ($("#department").val() == "") {
+                app.Notification.warning("请填写部门");
+                return false;
+            }
+            //method1("grid");
+            var searchBar = $("#searchBar").kendoValidator().data("kendoValidator");
+            if (!searchBar.validate()) {
+                return false;
+            }
+            location.href = "/ReportForm/SaveToExcel?beginTime=" + $("#beginTime").val() + "&endTime=" + $("#endTime").val() + "&department=" + $("#department").val();
+            
+        });
+        var departmentsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/ReportForm/getDepartment"
+                }
+            }
+        });
+        var searchBarModel = kendo.observable({
+            departments: departmentsDataSource,
+
+
+            startDate: "",
+            endingDate: "",
+            department: null
+        });
+        kendo.bind($("#searchBar"), searchBarModel);
+    })
+</script>
+
+@*<style>
+    #searchBox {
+        border: 1px solid #BFBFBF;
+        padding: 10px 20px;
+    }
+
+        #searchBox > span {
+            margin-right: 40px;
+        }
+
+    .but {
+        background: #223E41;
+        color: white;
+    }
+
+    #excel {
+        margin-left: 10px;
+    }
+
+        #excel .k-icon {
+            background-position: -192px 0;
+        }
+
+    #grid thead {
+        background: #E9EEF1;
+    }
+
+    #grid td, th {
+        padding: 5px 10px;
+        border: 1px solid #223e41;
+    }
+</style>*@
+
+
+<script>
+    function method1(tableid) {
+        var curTbl = document.getElementById(tableid);
+        var oXL = new ActiveXObject("Excel.Application");
+        var oWB = oXL.Workbooks.Add();
+        var oSheet = oWB.ActiveSheet;
+        var sel = document.body.createTextRange();
+        sel.moveToElementText(curTbl);
+        sel.select();
+        sel.execCommand("Copy");
+        oSheet.Paste();
+        oXL.Visible = true;
+
+
+    }
+</script>
+
+

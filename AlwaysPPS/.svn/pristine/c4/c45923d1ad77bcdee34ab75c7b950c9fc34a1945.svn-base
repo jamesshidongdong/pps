@@ -1,0 +1,12 @@
+namespace AlwaysPPS.Library.Constant
+{
+    public class SystemRoles
+    {
+        public const string TraiiceLeader = "1";
+            public const string TeamLeader = "2";
+            public const string TeamMember = "3";
+            public const string PM = "4";
+            public const string Buhead = "5";
+
+    }
+}

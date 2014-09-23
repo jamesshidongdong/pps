@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A88C6313-BFA1-41D3-88A5-28D8AC30E041}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AlwaysPPS.Service</RootNamespace>
+    <AssemblyName>AlwaysPPS.Service</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AlwaysFramework.DAL">
+      <HintPath>..\packages\AlwaysFramework\AlwaysFramework.DAL.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CtProjectMileStoneTemplateService.cs" />
+    <Compile Include="CtProjectTypeService.cs" />
+    <Compile Include="CtTeamService.cs" />
+    <Compile Include="OaDepartmentService.cs" />
+    <Compile Include="OaEmployeeService.cs" />
+    <Compile Include="ProjectDocumentService.cs" />
+    <Compile Include="ProjectService.cs" />
+    <Compile Include="ProjectWorkPlanService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReportFormService.cs" />
+    <Compile Include="TProjectMilestoneService.cs" />
+    <Compile Include="TProjectTaskService.cs" />
+    <Compile Include="TResourceTeamService.cs" />
+    <Compile Include="TTimesheetService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AlwaysPPS.Business\AlwaysPPS.Business.csproj">
+      <Project>{95124f24-e15c-4d56-a3c0-537fd7376305}</Project>
+      <Name>AlwaysPPS.Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AlwaysPPS.Data\AlwaysPPS.Data.csproj">
+      <Project>{1b24022b-fd1e-47f7-b17a-01525c2d4992}</Project>
+      <Name>AlwaysPPS.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AlwaysPPS.Entity\AlwaysPPS.Entity.csproj">
+      <Project>{e2108467-a0dd-4d11-9c34-56c2c133646f}</Project>
+      <Name>AlwaysPPS.Entity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AlwaysPPS.Library\AlwaysPPS.Library.csproj">
+      <Project>{872e2551-6a7a-4951-96b8-e39de036131e}</Project>
+      <Name>AlwaysPPS.Library</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,166 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web;
+using System.Web.Mvc;
+using Always.IAM.MVC.Controllers;
+using AlwaysFramework.DAL;
+using AlwaysPPS.Business;
+using AlwaysPPS.Entity.FormatMODEL;
+using AlwaysPPS.Service;
+
+namespace AlwaysPPS.Web.Controllers
+{
+    public class BaseController : BaseAuthorizedController
+    {
+        //------------------------------常量们 ----------------------------
+        //private const string UID = "uid";
+        //
+        // GET: /Base/
+        public void BindViewBagUser()
+        {
+            ViewBag.UserName = User.UserName;
+        }
+
+        
+        public BaseController()
+        {
+        }
+        protected readonly IUnitOfWork _unitOfWork;
+
+        public BaseController(IUnitOfWork unitOfWork)
+        {
+
+         
+            _unitOfWork = unitOfWork;
+        }
+        //角色
+
+
+        //------------------------------Ajax/Js消息------------------------
+
+        #region 2.0 返回 Ajax请求的 Json字符串 +AjaxMsg(MODEL.FormatMODEL.AjaxMsgStatu statue, string msg, string backUrl, object data)
+
+        /// <summary>
+        /// 返回 Ajax请求的 Json字符串
+        /// </summary>
+        /// <param name="statue">处理状态</param>
+        /// <param name="msg">消息</param>
+        /// <param name="backUrl">跳转页面</param>
+        /// <param name="data">数据</param>
+        /// <returns></returns>
+        public ActionResult AjaxMsg(AjaxMsgStatu statue = AjaxMsgStatu.Ok, string msg = "", string backUrl = "",
+            object data = null)
+        {
+            AjaxMsg msgObj = new AjaxMsg()
+            {
+                Statu = statue,
+                Msg = msg,
+                BackUrl = backUrl,
+                Data = data
+            };
+
+            return new JsonResult()
+            {
+                Data = msgObj,
+                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+            };
+            //return new ContentResult()
+            //{
+            //    Content = msgObj.ToJson(),//ToJson方法 来自 DataHelper里对 object 的扩展
+            //    ContentType = "text/html"
+            //};
+        }
+
+        #endregion
+
+        //#region 1.1 Session中的登录用户ID+Ou_UserInfo User.UserId
+        ///// <summary>
+        ///// 1.1 Session中的登录用户对象
+        ///// </summary>
+        //public int
+        //{
+        //    set
+        //    {
+        //        Session[UID] = value;
+
+        //    }
+        //    get
+        //    {
+        //        return 2;
+        //        //return  Convert.ToInt32(Session[UID]);
+        //    }
+        //}
+        //#endregion
+
+
+
+
+        #region 2.1 返回 Ajax请求的 Json字符串 -便捷操作方法
+
+        public ActionResult AjaxMsgOk(string msg = "操作成功", string backUrl = "", object data = null)
+        {
+            return AjaxMsg(AjaxMsgStatu.Ok, msg, backUrl, data);
+        }
+
+        public ActionResult AjaxMsgNoOk(string msg = "操作失败", string backUrl = "", object data = null)
+        {
+            return AjaxMsg(AjaxMsgStatu.NoOk, msg, backUrl, data);
+        }
+
+        public ActionResult AjaxMsgErr(string msg = "操作异常", string backUrl = "", object data = null)
+        {
+            return AjaxMsg(AjaxMsgStatu.Error, msg, backUrl, data);
+        }
+
+        public ActionResult AjaxMsgErr(Exception ex, string backUrl = "", object data = null)
+        {
+            return AjaxMsg(AjaxMsgStatu.Error, ex.Message, backUrl, data);
+        }
+
+        #endregion
+
+        #region 2.2 返回 Js 消息及跳转 代码 + JsMsg(string msg, string backUrl)
+
+        /// <summary> 
+        /// 2.2 返回 Js 消息及跳转 代码
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="backUrl"></param>
+        /// <returns></returns>
+        public ActionResult JsMsg(string msg, string backUrl)
+        {
+            System.Text.StringBuilder sbJs = new StringBuilder("<script>alert(\"" + msg + "\");", 200);
+            sbJs.AppendLine("if(window.top)window.top.location=\"" + backUrl + "\";");
+            sbJs.AppendLine("else window.location=\"" + backUrl + "\";");
+            return new ContentResult() {Content = sbJs.ToString() + "</script>", ContentType = "text/html"};
+        }
+
+        #endregion
+
+
+        public void SendEmail(string toEmail,string title,string body)
+        {
+            //Logger logger = LogManager.GetCurrentClassLogger();
+            //logger.Fatal("Error Message Here");
+            Mail mail = new Mail();
+            mail.SendMail(toEmail, title, body);
+        }
+        public void SendEmail(string toEmail, string title, string body,List<string> emails )
+        {
+            //Logger logger = LogManager.GetCurrentClassLogger();
+            //logger.Fatal("Error Message Here");
+            Mail mail = new Mail();
+            mail.SendMail(toEmail, title, body, emails);
+        }
+
+//        public void SendEmail(string toEamil,string title,string body,string  )
+//        {
+//
+//        }
+
+    }
+
+}
+

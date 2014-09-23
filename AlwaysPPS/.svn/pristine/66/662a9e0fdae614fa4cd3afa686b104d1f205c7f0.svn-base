@@ -1,0 +1,252 @@
+﻿@{
+    ViewBag.Title = "ProjectDetail";
+}
+
+@{
+    ViewBag.Title = "AddNewItem";
+}
+
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="titleBar">
+            <h3>项目详情</h3>
+        </div>
+        <div class="subTitleBar">
+            <div class="row">
+                <div class="col-md-3">
+                    <b class="title">项目编号：</b>
+                    <span class="details">@ViewBag.project.ProjectCode</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建日期：</b>
+                    <span class="details">@ViewBag.project.RequestedDate</span>
+                </div>
+                <div class="col-md-3">
+                    <b class="title">创建人：</b>   
+                    <span class="details">@ViewBag.RequestName</span>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div id="addNewItem" class="addNewItemBox">
+                <form role="form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>项目名称</label>
+                                <input id="proNameID" type="text" class="form-control"
+                                       data-auto-bind="false"
+                                       data-bind="value: projectName"  readonly="readonly"
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                <label >客&nbsp;&nbsp;&nbsp;&nbsp;户</label>
+                                <input id="pcid" type="text" class="form-control" id="clientName"
+                                       data-role="autocomplete"
+                                       data-auto-bind="false"
+                                       data-bind="source: clients,
+                                                    value: client" readonly="readonly"
+                                    />
+                            </div>
+                            <div class="col-md-2">
+                                <label>项目类别</label>
+                                
+                                <input type="text" class="form-control"
+                                       data-auto-bind="false"
+                                       data-bind="value: projectType" 
+                                       readonly="readonly"/>
+
+                            </div>
+                            <div class="col-md-2">
+                                <label >部&nbsp;&nbsp;&nbsp;&nbsp;门</label>
+
+
+                                <input type="text" class="form-control"
+                                       data-auto-bind="false"
+                                       data-bind="value: department" 
+                                       readonly="readonly"  />
+                            </div>
+                           
+                            <div class="col-md-2">
+                                <label>期&nbsp;&nbsp;&nbsp;&nbsp;限</label>
+                                <input id="deadlineID" class="form-control" 
+                                       data-role="datepicker"
+                                       data-bind="value: deadline" readonly="readonly"
+                                    />                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>项目介绍</label>
+                        <textarea id="txtProDuction" class="form-control" rows="3" data-auto-bind="false" data-bind="value: projectIntroduction" readonly="readonly"></textarea>
+                    </div>
+                    <div class="buttonTeam">
+                       
+                        <button class="btn btn-blueBlack" data-bind="click:reject" type="button"><i class="icon-thumbs-down"></i>&nbsp;&nbsp;拒绝</button>
+                        <button class="btn btn-blueBlack"  data-bind="click: approve" type="button"><i class="icon-thumbs-up"></i>&nbsp;&nbsp;批准</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="display: none"  id="rejectID">
+    <form class="form-horizontal" role="form" id="formUpload">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">原由：</label>
+            <div class="col-sm-6">
+                 <textarea id="txtresson" class="form-control" rows="3" data-auto-bind="false" data-bind="value: projectIntroduction"></textarea>
+            </div>
+           
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-9 col-sm-1">
+               <button class="btn btn-blueBlack" id="btnConfirmRd"  type="button">确认</button>
+            </div>
+        </div>
+        <input type="hidden" name="ProjectId" value="@ViewBag.projectID"/>
+    </form>
+</div>
+<script type="text/javascript">
+
+    $(function() {
+        kendo.culture("zh-CN");
+        var clientsDataSource = new kendo.data.DataSource({
+            serverFiltering: true,
+            type: "aspnetmvc-ajax",
+            transport: {
+                read: {
+                    dataType: "json",
+                    url: "/Report/GetClient",
+                    data: function() {
+                        var keyword = $("#clientName").data("kendoAutoComplete").value() || "";
+                        return { client: keyword };
+                    }
+                }
+            }
+        });
+
+
+        //弹出框
+
+        function rejectFunction() {
+            var rejectArea = $("#rejectID");
+          
+            if (!rejectArea.data("kendoWindow")) {
+                rejectArea.kendoWindow({
+                    width: "510px",
+                    height: "250px",
+                    resizable: false,
+                    modal: true,
+                    title: "拒绝原由",
+                    actions: [
+                        "Close"
+                    ],
+              
+                    close: function() {
+                        $("#txtresson").val("");
+                        //$("#styleFile").data("kendoDropDownList").select(0);
+                        //$(".k-upload").find(".k-upload-status").remove();
+                        //$(".k-upload").find(".k-upload-files").remove();
+                        //$(".k-upload").addClass("k-upload-empty");
+                    }
+
+                });
+            }
+            $("#btnConfirmRd").click(function () {
+                var res = $("#txtresson").val().trim();
+                rejectEd(res);
+            });
+            rejectArea.data("kendoWindow").open().center();
+
+        }
+
+        function rejectEd(res) {
+            var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+            if (!editTraining.validate()) {
+                return false;
+            }
+            //定义实体object
+            var approveModel = {
+                projectName: $("#proNameID").val().trim(),
+                client: $("#pcid").val().trim(),
+                department: '@ViewBag.project.DepartmentId',
+                projectType: '@ViewBag.project.ProjectTypeId',
+                deadline: $("#deadlineID").val().trim(),
+                projectIntroduction: $("#txtProDuction").val().trim(),
+                types: 'R',
+                projectID: '@ViewBag.project.ProjectId',
+                Reason: res
+            };
+            $.ajax({
+                type: 'Post',
+                url: "/Report/ApproveOrReject",
+                data: kendo.stringify(approveModel),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                
+                success: function(res) {
+                    if (res.Statu == "1") {
+                        window.location = "/Project/GetMyProjectDetail?id=" + '@ViewBag.project.ProjectId';
+                    }
+
+                }
+            });
+        }
+
+        var addNewItemModel = kendo.observable({
+            clients: clientsDataSource,
+
+            projectName: '@Html.Raw(ViewBag.project.ProjectName)',
+            department: '@Html.Raw(ViewBag.deptName)',
+            client: '@Html.Raw(ViewBag.project.ClientName)',
+
+            projectType: '@Html.Raw(ViewBag.projectTypeName)',
+            deadline: '@ViewBag.project.Deadline',
+            projectIntroduction: '@Html.Raw(ViewBag.project.ProjectDescription)',
+            isPrimitive: false,
+
+            approve: function(e) {
+                e.preventDefault();
+                var editTraining = $("#addNewItem").kendoValidator().data("kendoValidator");
+                if (!editTraining.validate()) {
+                    return false;
+                }
+                //定义实体object
+                var approveModel = {
+                    projectName: this.projectName,
+                    client: this.client,
+                    department: '@ViewBag.project.DepartmentId',
+                    projectType: '@ViewBag.project.ProjectTypeId',
+                    deadline: this.deadline,
+                    projectIntroduction: this.projectIntroduction,
+                    types: 'A',
+                    projectID: '@ViewBag.project.ProjectId',
+                };
+                $.ajax({
+                    type: 'Post',
+                    url: "/Report/ApproveOrReject",
+                    data: kendo.stringify(approveModel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.Statu == "1") {
+                            window.location = "/Project/GetMyProjectDetail?id=" + '@ViewBag.project.ProjectId';
+                        }
+
+                    }
+                });
+
+            },
+            reject: function(e) {
+                e.preventDefault();
+                rejectFunction();
+
+            },
+        });
+        kendo.bind($("#addNewItem"), addNewItemModel);
+
+
+    });
+</script>
+

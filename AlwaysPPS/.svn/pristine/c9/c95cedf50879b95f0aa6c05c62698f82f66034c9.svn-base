@@ -1,0 +1,71 @@
+﻿@using AlwaysPPS.Entity
+@using AlwaysPPS.Entity.StoredProcedure
+@{ int num = 0;}
+
+<table id="grid" class="table hrSummaryTable table-bordered">
+@if (Model != null)
+{
+
+    <thead>
+        <tr>
+            <th>日期</th>
+
+            @foreach (var i in ((Dictionary<int, string>)Model["d1"]))
+            {
+                <th>@i.Value</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+    @*@{ int index = 0;}*@
+    @{List<SpRPTTeamTimeSheet> listData = (List<SpRPTTeamTimeSheet>)ViewBag.pros;}
+
+
+    @foreach (var i in Model["d2"])
+    {
+        <tr @{
+                if (DateTime.Parse(i).ToString("dddd") == "星期六" || DateTime.Parse(i).ToString("dddd") == "星期日")
+                {
+                    @Html.Raw("style='background-color:powderblue'")
+                }
+            }>
+            <td>@DateTime.Parse(i).ToString("yyyy/MM/dd")</td>
+            @foreach (var e in ((Dictionary<int, string>)Model["d1"]))
+            {
+
+                var tempData = listData.Where(d => d.uid == e.Key && d.dates.ToString("yyyy-MM-dd") == Convert.ToDateTime(i).ToString("yyyy-MM-dd"));
+
+
+                if (tempData.Any()==false)
+                {
+                    <td></td>
+                }
+                else
+                {
+                    <td>
+                        @if (tempData.Sum(tx => tx.totalHours) >= 8)
+                        {
+                            <span class="greenPoint"></span>
+                        }
+                        else {
+                            <span class="redPoint"></span>
+                        }
+                        <br/>                            
+                        <ul>                                
+                            @foreach (var h in tempData)
+                            {
+                                <li>@Html.Raw(h.content)</li>                                
+                            }                              
+                        </ul>
+                    </td>
+                }
+
+            }
+
+            @*@{ index++; }*@
+        </tr> 
+    }
+</tbody>
+
+}
+</table>

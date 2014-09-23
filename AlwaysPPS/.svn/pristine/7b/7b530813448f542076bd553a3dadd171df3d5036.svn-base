@@ -1,0 +1,57 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AlwaysFramework.DAL;
+
+namespace AlwaysPPS.Entity.StoredProcedure
+{
+    public class SpSearchProject : BaseProcedure
+    {
+        public int ProjectId { get; set; }
+        public string ProjectCode { get; set; }
+        public string ProjectName { get; set; }
+        public string ProjectDescription { get; set; }
+        public string ClientName { get; set; }
+        public int? SystemId { get; set; }
+        public int ProjectTypeId { get; set; }
+        public int RequestorUid { get; set; }
+        public int DepartmentId { get; set; }
+        public DateTime? Deadline { get; set; }
+        public DateTime? RequestedDate { get; set; }
+        public int AssignedToUid { get; set; }
+        public string Status { get; set; }
+        public string State { get; set; }
+        public int? UpdatedByUid { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public DateTime? DateClosed { get; set; }
+        public string RequestorUname { get; set; }
+        public string AssignedToUname { get; set; }
+        public string RequestedDateF { get; set; }
+        public string DateClosedF { get; set; }
+        public string DeadlineF { get; set; }
+        public string StatusF { get; set; }
+        public string DeptName { get; set; }
+
+        public int TotalCount { get; set; }
+
+
+        public const string NAME = "spSearchProject @userId,@ProjectCode,@ClientName,@Status,@State,@PageIndex,@NumRow";
+        public static SqlParameter[] Parameters(SearchParameter upParam)
+        {
+            SqlParameter[] parameters =
+            {
+                ParamVar("@userId",upParam.userId),
+                ParamVar("@ProjectCode", upParam.ProjectCode),
+                ParamVar("@ClientName", upParam.ClientName),
+                ParamVar("@Status", upParam.Status),
+                ParamVar("@State", upParam.State),
+                ParamVar("@PageIndex", upParam.PageIndex),
+                ParamVar("@NumRow", upParam.NumRow)
+            };
+            return parameters;
+        }
+    }
+}

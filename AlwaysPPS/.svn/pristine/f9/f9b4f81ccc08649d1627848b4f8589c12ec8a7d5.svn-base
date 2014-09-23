@@ -1,0 +1,101 @@
+﻿@{
+    ViewBag.Title = "SearchProjects";
+}
+
+
+<div id="SearchItem"></div>
+<script>
+    $(function () {
+        function JumpDetailPage(e) {
+            e.preventDefault();
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var accId = dataItem.ProjectId;
+            window.location.href = "/Html/ProjectDetail?ProjectId=" + accId;
+
+        }
+
+        $("#SearchItem").kendoGrid({
+            dataSource: {
+                serverFiltering: true,
+                serverPaging: true,
+                type: "aspnetmvc-ajax",
+                transport: {
+                    read: {
+                        url: '@Url.Action("SearchProjects", "Search")',
+                        data: function (data) {
+                            return {
+                                PageIndex: data.page,
+                                NumRow: data.take,
+                                //ProjectCode: $("#ProjectCode").val(),
+                                //ClientName: $("#ClientName").val(),
+                                //Status: $("#Status").val()
+                                ProjectCode: null,
+                                ClientName: null,
+                                Status: "A"
+                            };
+                        }
+                    },
+                    dataType: "json",
+                    type: "POST"
+                },
+                pageSize: 15
+            },
+            //height:800,
+            //sortable: true,
+            //reorderable: true,
+            resizable: true,
+            pageable: false,
+            columns: [
+                 {
+                     command: [
+                         {
+                             name: "",
+                             text: "查看详细",
+                             imageClass: "k-icon iconB-search ",
+                             click: JumpDetailPage
+                         }
+                     ],
+                     width: '20%',
+
+                 },
+                {
+                    field: "ProjectCode",
+                    title: "项目编号",
+                    width: '40%'
+                },
+                {
+                    field: "ProjectName",
+                    title: "项目名称",
+                    width: '40%'
+                },
+                {
+                    field: "ClientName",
+                    title: "客户",
+                    width: '40%'
+                },
+                {
+                    field: "DeadlineF",
+                    title: "项目期限",
+                    width: '30%'
+                },
+                {
+                    field: "StatusF",
+                    title: "状态",
+                    width: '20%'
+                },
+                {
+                    field: "RequestorName",
+                    title: "创建人",
+                    width: '30%'
+                },
+                {
+                    field: "RequestedDateF",
+                    title: "创建时间",
+                    width: '30%'
+                }
+            ]
+            //editable: true
+        });
+    });
+</script>

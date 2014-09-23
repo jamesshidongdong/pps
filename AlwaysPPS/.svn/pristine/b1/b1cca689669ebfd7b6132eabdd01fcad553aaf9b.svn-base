@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E2108467-A0DD-4D11-9C34-56C2C133646F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AlwaysPPS.Entity</RootNamespace>
+    <AssemblyName>AlwaysPPS.Entity</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AlwaysFramework.DAL">
+      <HintPath>..\packages\AlwaysFramework\AlwaysFramework.DAL.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CtProjectMileStoneTemplate.cs" />
+    <Compile Include="Common\DataHelper.cs" />
+    <Compile Include="CtDocumentType.cs" />
+    <Compile Include="CtEmailTemplate.cs" />
+    <Compile Include="CtMilestone.cs" />
+    <Compile Include="CtMilestoneTemplate.cs" />
+    <Compile Include="CtProjectType.cs" />
+    <Compile Include="CtRole.cs" />
+    <Compile Include="CtTaskType.cs" />
+    <Compile Include="CtTeam.cs" />
+    <Compile Include="FormatMODEL\AjaxMsg.cs" />
+    <Compile Include="FormatMODEL\FullCalendarModel.cs" />
+    <Compile Include="FormatMODEL\HtmlData.cs" />
+    <Compile Include="OaDepartment.cs" />
+    <Compile Include="OaEmployee.cs" />
+    <Compile Include="OaJobGrade.cs" />
+    <Compile Include="OaOrganisationChart.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="report.cs" />
+    <Compile Include="StoredProcedure\BaseProcedure.cs" />
+    <Compile Include="StoredProcedure\GetTimeSheetParameter.cs" />
+    <Compile Include="StoredProcedure\PlanTimeParameter.cs" />
+    <Compile Include="StoredProcedure\SearchParameter.cs" />
+    <Compile Include="StoredProcedure\SpGetPlanTime.cs" />
+    <Compile Include="StoredProcedure\SpRPTByTeamParameter.cs" />
+    <Compile Include="StoredProcedure\SpRPTByTeamTimeSheet.cs" />
+    <Compile Include="StoredProcedure\SpRPTGetTimeSheetByTeam.cs" />
+    <Compile Include="StoredProcedure\SpRPTParameter.cs" />
+    <Compile Include="StoredProcedure\SpRPTTeamTimeSheet.cs" />
+    <Compile Include="StoredProcedure\SpSearchProject.cs" />
+    <Compile Include="SUserAccessLog.cs" />
+    <Compile Include="Sysdiagram.cs" />
+    <Compile Include="TProject.cs" />
+    <Compile Include="TProjectDocument.cs" />
+    <Compile Include="TProjectMilestone.cs" />
+    <Compile Include="TProjectTask.cs" />
+    <Compile Include="TProjectWorkPlan.cs" />
+    <Compile Include="TResourceTeam.cs" />
+    <Compile Include="TTimesheet.cs" />
+    <Compile Include="ViewModel\MileStone.cs" />
+    <Compile Include="ViewModel\Project.cs" />
+    <Compile Include="ViewModel\SearchModel.cs" />
+    <Compile Include="ViewModel\TeamMember.cs" />
+    <Compile Include="ViewModel\WorkPlan.cs" />
+    <Compile Include="ViewModel\SerchUserModel.cs" />
+    <Compile Include="VProject.cs" />
+    <Compile Include="VProjectWorkPlan.cs" />
+    <Compile Include="VTeamMember.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

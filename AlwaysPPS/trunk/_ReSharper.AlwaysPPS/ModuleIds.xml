@@ -1,0 +1,9 @@
+<Modules>
+  <Module PersistentId="54E8D395-28AD-4C7E-B55B-65C93FDD45C1" ModuleId="AlwaysPPS.Web" />
+  <Module PersistentId="A88C6313-BFA1-41D3-88A5-28D8AC30E041" ModuleId="AlwaysPPS.Service" />
+  <Module PersistentId="E2108467-A0DD-4D11-9C34-56C2C133646F" ModuleId="AlwaysPPS.Entity" />
+  <Module PersistentId="872E2551-6A7A-4951-96B8-E39DE036131E" ModuleId="AlwaysPPS.Library" />
+  <Module PersistentId="1B24022B-FD1E-47F7-B17A-01525C2D4992" ModuleId="AlwaysPPS.Data" />
+  <Module PersistentId="63DA5C42-7511-4AAD-9FCD-22E7E03CF4B5" ModuleId="AlwaysPPS.TempProject" />
+  <Module PersistentId="95124F24-E15C-4D56-A3C0-537FD7376305" ModuleId="AlwaysPPS.Business" />
+</Modules>
